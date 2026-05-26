@@ -31,7 +31,7 @@ const colors = {
     success: "#7CB992",
     successForeground: "#FFFFFF",
 
-    overlay: "rgba(44, 26, 21, 0.5)",
+    overlay: "rgba(44, 26, 21, 0.35)",
   },
 
   radius: 16,
