@@ -1,0 +1,27 @@
+kind = "mobile"
+previewPath = "/"
+title = "Florish — Fitness App"
+version = "1.0.0"
+id = "artifacts/florish"
+router = "expo-domain"
+
+[[integratedSkills]]
+name = "expo"
+version = "1.0.0"
+
+[[services]]
+ensurePreviewReachable = "/status"
+name = "expo"
+paths = [ "/" ]
+localPort = 26261
+
+[services.development]
+run = "pnpm --filter @workspace/florish run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/florish", "run", "build" ]
+run = [ "pnpm", "--filter", "@workspace/florish", "run", "serve" ]
+
+[services.env]
+PORT = "26261"
+BASE_PATH = "/"

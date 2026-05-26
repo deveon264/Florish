@@ -1,0 +1,48 @@
+{
+  "expo": {
+    "name": "Florish",
+    "slug": "florish",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "florish",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FFF9F7"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.florish.app"
+    },
+    "android": {
+      "package": "com.florish.app"
+    },
+    "web": {
+      "favicon": "./assets/images/icon.png"
+    },
+    "plugins": [
+      [
+        "expo-router",
+        {
+          "origin": "https://replit.com/"
+        }
+      ],
+      "expo-font",
+      "expo-web-browser",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Florish needs access to your photos to add progress pictures.",
+          "cameraPermission": "Florish needs access to your camera to scan food and take progress photos."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}

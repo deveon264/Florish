@@ -1,0 +1,20 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "4jOSjYpe4ra5dq-LD9EzB"
+uri = "file://artifacts/florish/assets/images/icon.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "UbwSa9kUMc-blnTttcaM3"
+uri = "file://artifacts/florish/assets/images/hero.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "EzAHSGyYi1ez8I1B47aGS"
+uri = "file://artifacts/florish/assets/images/workout_banner.png"
+type = "image"
+title = "generated_image"

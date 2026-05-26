@@ -1,0 +1,132 @@
+BUILD A FITNESS APP — FULL STACK MOBILE APPLICATION
+
+Build a full cross-platform mobile fitness app using React Native with Expo, targeting both iOS and Android. The app is called Florish and is built around a real fitness influencer/brand ambassador called Dillish. It should feel like a premium combination of Cal AI, Women’s Workout, and Nike Training Club.
+
+-----
+
+DESIGN & BRANDING
+
+- App name: Florish — use this everywhere throughout the app
+- Ambassador name: Dillish — use this everywhere throughout the app
+- Color palette: whites, soft pinks, and beige tones. Never use purple.
+- Clean, feminine, premium aesthetic
+- Smooth animations and transitions throughout
+- All UI should feel modern, minimal, and high-end
+
+-----
+
+CORE FEATURES TO BUILD
+
+1. ONBOARDING FLOW
+
+- Welcome screen with Dillish’s photo/branding
+- User signs up with name, email, password
+- Fitness goal selection (lose weight, tone up, build strength, general fitness)
+- Basic profile setup (age, weight, height)
+- Daily water intake goal set during onboarding
+- Subscription paywall before accessing content
+
+1. SUBSCRIPTION SYSTEM
+
+- Three tiers: Weekly, Monthly, and Yearly
+- Display pricing clearly with yearly as the recommended option
+- Integrate with RevenueCat for subscription management on both iOS and Android
+- Free trial option toggle (7 days)
+- Users cannot access workout or calorie content without an active subscription
+
+1. HOME SCREEN / DASHBOARD
+
+- Personalised greeting with Dillish’s branding
+- Today’s recommended workout
+- Daily calorie summary widget
+- Daily water intake progress widget
+- Weekly progress streak tracker
+- Quick access to all core sections
+
+1. WORKOUT SECTION (inspired by Nike Training Club & Women’s Workout app)
+
+- Video-based workout library uploaded and managed by admin
+- Categories: Full Body, Weight Loss, Toning, Abs, Upper Body, Lower Body, Beginner, Advanced
+- Each workout has: title, duration, difficulty level, calories burned estimate, video player, and description
+- Workout player screen with play/pause, progress bar, and completion tracking
+- Users can favourite/save workouts
+- Completed workouts logged to profile history
+
+1. AI CALORIE TRACKER (inspired by Cal AI)
+
+- Users can snap a photo of their food OR type/describe what they ate
+- AI identifies the food and estimates calories, protein, carbs, and fat automatically
+- Daily calorie goal set during onboarding based on user’s profile and fitness goal
+- Visual daily calorie progress bar on home screen and tracker screen
+- Meal log showing breakfast, lunch, dinner, and snacks
+- Users can manually edit or delete any logged meal
+
+1. WATER INTAKE TRACKER
+
+- Daily water intake goal set during onboarding (default 8 glasses / 2 litres)
+- Simple tap-to-add interface (add a glass or custom ml amount)
+- Visual progress indicator (filling cup or progress bar)
+- Daily water log resets at midnight
+- Reminder notifications to drink water throughout the day
+- Weekly water intake history
+
+1. PROGRESS TRACKING
+
+- Progress photos: users can take or upload a weekly photo stored privately on their profile
+- Photos are only visible to the user, never shared publicly
+- Weight logging: users can log their current weight weekly
+- Weight progress displayed as a simple line graph over time
+- BMI calculator based on logged weight and height from profile
+- All progress data (photos, weight, workouts completed) visible in one Progress screen
+
+1. PROFILE SCREEN
+
+- User stats: weight, height, goal
+- Subscription status and management
+- Workout history and streak
+- Progress photos gallery (private)
+- Weight graph
+- Settings: edit profile, notifications, change password, logout
+
+1. ADMIN PANEL (simple web dashboard)
+
+- Ability to upload new workout videos with title, category, difficulty, and description
+- View total subscribers and basic revenue overview
+- Manage users
+
+-----
+
+TECH STACK
+
+- Frontend: React Native with Expo
+- Subscriptions: RevenueCat
+- State management: Zustand or Redux
+- Navigation: React Navigation
+- Choose the best available tools for backend, auth, database, video storage, and AI calorie tracking
+- All API keys must be stored in environment variables, never hardcoded
+
+-----
+
+ADDITIONAL REQUIREMENTS
+
+- All screens must be fully responsive for both iOS and Android
+- Use placeholder content and images everywhere a real asset is not yet available
+- App must handle loading states, empty states, and errors gracefully
+- Push notification support (workout reminders, streak alerts, water reminders)
+- Dark mode support optional but preferred
+- Progress photos must be stored securely and privately per user
+
+-----
+
+Build order:
+
+1. Project structure and navigation scaffold
+1. Onboarding and auth
+1. Subscription paywall
+1. Home dashboard
+1. Workout library and player
+1. AI calorie tracker
+1. Water intake tracker
+1. Progress tracking (photos, weight, BMI)
+1. Profile screen
+1. Admin panel
