@@ -281,6 +281,41 @@ export async function updateStreak(): Promise<number> {
   return streak;
 }
 
+// Exercise demo videos (admin-uploaded, keyed by exercise name)
+export type ExerciseVideo = {
+  id: string;
+  exerciseName: string;
+  uri: string;
+  createdAt: string;
+};
+
+export async function getExerciseVideos(): Promise<Record<string, ExerciseVideo>> {
+  const raw = await AsyncStorage.getItem("florish_exercise_videos");
+  return raw ? JSON.parse(raw) : {};
+}
+
+export async function setExerciseVideo(
+  exerciseName: string,
+  uri: string
+): Promise<ExerciseVideo> {
+  const all = await getExerciseVideos();
+  const entry: ExerciseVideo = {
+    id: uid(),
+    exerciseName,
+    uri,
+    createdAt: new Date().toISOString(),
+  };
+  all[exerciseName.toLowerCase()] = entry;
+  await AsyncStorage.setItem("florish_exercise_videos", JSON.stringify(all));
+  return entry;
+}
+
+export async function deleteExerciseVideo(exerciseName: string): Promise<void> {
+  const all = await getExerciseVideos();
+  delete all[exerciseName.toLowerCase()];
+  await AsyncStorage.setItem("florish_exercise_videos", JSON.stringify(all));
+}
+
 // Custom workout videos (admin-uploaded)
 export type CustomWorkoutVideo = {
   id: string;

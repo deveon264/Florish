@@ -1,7 +1,8 @@
 import { router, useLocalSearchParams } from "expo-router";
+import * as ImagePicker from "expo-image-picker";
 import React, { useEffect, useRef, useState } from "react";
 import {
-  Animated,
+  Alert,
   Platform,
   ScrollView,
   StyleSheet,
@@ -14,13 +15,50 @@ import { Feather } from "@expo/vector-icons";
 import { useColors } from "@/hooks/useColors";
 import { getWorkoutById } from "@/lib/workouts";
 import { useFitness } from "@/context/FitnessContext";
+import { useAuth } from "@/context/AuthContext";
+import {
+  getExerciseVideos,
+  setExerciseVideo,
+  deleteExerciseVideo,
+  type ExerciseVideo,
+} from "@/lib/storage";
 import * as Haptics from "expo-haptics";
+
+function ExerciseVideoPlayer({ uri }: { uri: string }) {
+  const [VideoComp, setVideoComp] = useState<any>(null);
+
+  useEffect(() => {
+    import("expo-av").then(({ Video, ResizeMode }) => {
+      setVideoComp({ Video, ResizeMode });
+    });
+  }, []);
+
+  if (!VideoComp) {
+    return (
+      <View style={styles.videoLoading}>
+        <Feather name="loader" size={24} color="#aaa" />
+      </View>
+    );
+  }
+
+  const { Video, ResizeMode } = VideoComp;
+  return (
+    <Video
+      source={{ uri }}
+      style={styles.videoPlayer}
+      useNativeControls
+      resizeMode={ResizeMode.CONTAIN}
+      shouldPlay={false}
+    />
+  );
+}
 
 export default function WorkoutDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { completeWorkout, toggleFavorite, favoriteWorkouts } = useFitness();
+  const { isAdmin } = useAuth();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const botPad = Platform.OS === "web" ? 34 : insets.bottom;
 
@@ -30,10 +68,16 @@ export default function WorkoutDetailScreen() {
   const [timeLeft, setTimeLeft] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
   const [elapsed, setElapsed] = useState(0);
+  const [exerciseVideos, setExerciseVideos] = useState<Record<string, ExerciseVideo>>({});
+  const [uploadingFor, setUploadingFor] = useState<string | null>(null);
+  const [showVideoFor, setShowVideoFor] = useState<string | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const progressAnim = useRef(new Animated.Value(0)).current;
 
   const isFav = favoriteWorkouts.includes(id ?? "");
+
+  useEffect(() => {
+    getExerciseVideos().then(setExerciseVideos);
+  }, []);
 
   useEffect(() => {
     if (workout && workout.exercises[currentExercise]) {
@@ -82,6 +126,46 @@ export default function WorkoutDetailScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
 
+  const handleUploadVideo = async (exerciseName: string) => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permission needed", "Please allow access to your media library.");
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["videos"],
+      allowsEditing: false,
+      quality: 1,
+    });
+    if (result.canceled || !result.assets[0]) return;
+    setUploadingFor(exerciseName);
+    try {
+      const saved = await setExerciseVideo(exerciseName, result.assets[0].uri);
+      setExerciseVideos((prev) => ({ ...prev, [exerciseName.toLowerCase()]: saved }));
+    } finally {
+      setUploadingFor(null);
+    }
+  };
+
+  const handleDeleteVideo = (exerciseName: string) => {
+    Alert.alert("Remove Video", `Remove the demo video for "${exerciseName}"?`, [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Remove",
+        style: "destructive",
+        onPress: async () => {
+          await deleteExerciseVideo(exerciseName);
+          setExerciseVideos((prev) => {
+            const next = { ...prev };
+            delete next[exerciseName.toLowerCase()];
+            return next;
+          });
+          if (showVideoFor === exerciseName) setShowVideoFor(null);
+        },
+      },
+    ]);
+  };
+
   if (!workout) {
     return (
       <View style={[styles.center, { backgroundColor: colors.background }]}>
@@ -91,7 +175,9 @@ export default function WorkoutDetailScreen() {
   }
 
   const ex = workout.exercises[currentExercise];
-  const progress = workout.exercises.length > 0 ? (currentExercise / workout.exercises.length) : 0;
+  const progress = workout.exercises.length > 0 ? currentExercise / workout.exercises.length : 0;
+  const currentVideoKey = ex?.name.toLowerCase() ?? "";
+  const currentVideo = exerciseVideos[currentVideoKey];
 
   if (isCompleted) {
     return (
@@ -142,21 +228,51 @@ export default function WorkoutDetailScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView
-        contentContainerStyle={[styles.scroll, { paddingBottom: botPad + 24 }]}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={[styles.colorHero, { backgroundColor: workout.thumbnailColor + "33" }]}>
-          <Text style={[styles.exerciseNumber, { color: colors.mutedForeground }]}>
-            {currentExercise + 1} / {workout.exercises.length}
-          </Text>
-          <Text style={[styles.exerciseName, { color: colors.foreground }]}>{ex?.name ?? "Rest"}</Text>
-          {isActive && ex?.durationSeconds && (
-            <View style={[styles.timerCircle, { borderColor: colors.primary }]}>
-              <Text style={[styles.timerText, { color: colors.primary }]}>{timeLeft}s</Text>
+      <ScrollView contentContainerStyle={[styles.scroll, { paddingBottom: botPad + 24 }]} showsVerticalScrollIndicator={false}>
+        {/* Hero: video player if available, else coloured banner */}
+        {currentVideo ? (
+          <View style={styles.videoHero}>
+            <ExerciseVideoPlayer uri={currentVideo.uri} />
+            <View style={styles.videoHeroOverlay}>
+              <Text style={styles.videoExerciseNumber}>
+                {currentExercise + 1} / {workout.exercises.length}
+              </Text>
+              <Text style={styles.videoExerciseName}>{ex?.name ?? "Rest"}</Text>
             </View>
-          )}
-        </View>
+            {isAdmin && (
+              <TouchableOpacity
+                style={styles.videoDeleteBtn}
+                onPress={() => handleDeleteVideo(ex!.name)}
+              >
+                <Feather name="trash-2" size={14} color="#fff" />
+              </TouchableOpacity>
+            )}
+          </View>
+        ) : (
+          <View style={[styles.colorHero, { backgroundColor: workout.thumbnailColor + "33" }]}>
+            <Text style={[styles.exerciseNumber, { color: colors.mutedForeground }]}>
+              {currentExercise + 1} / {workout.exercises.length}
+            </Text>
+            <Text style={[styles.exerciseName, { color: colors.foreground }]}>{ex?.name ?? "Rest"}</Text>
+            {isActive && ex?.durationSeconds && (
+              <View style={[styles.timerCircle, { borderColor: colors.primary }]}>
+                <Text style={[styles.timerText, { color: colors.primary }]}>{timeLeft}s</Text>
+              </View>
+            )}
+            {isAdmin && ex && (
+              <TouchableOpacity
+                style={[styles.uploadVideoBtn, { backgroundColor: colors.primary }]}
+                onPress={() => handleUploadVideo(ex.name)}
+                disabled={uploadingFor === ex.name}
+              >
+                <Feather name={uploadingFor === ex.name ? "loader" : "upload"} size={14} color="#fff" />
+                <Text style={styles.uploadVideoBtnText}>
+                  {uploadingFor === ex.name ? "Uploading…" : "Upload Demo Video"}
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
 
         <View style={styles.content}>
           {ex && (
@@ -187,30 +303,56 @@ export default function WorkoutDetailScreen() {
           )}
 
           <Text style={[styles.allExercisesLabel, { color: colors.mutedForeground }]}>All Exercises</Text>
-          {workout.exercises.map((e, i) => (
-            <View
-              key={i}
-              style={[
-                styles.exerciseRow,
-                {
-                  backgroundColor: i === currentExercise ? colors.primary + "15" : colors.card,
-                  borderColor: i === currentExercise ? colors.primary : colors.border,
-                },
-              ]}
-            >
-              <View style={[styles.exerciseNumCircle, { backgroundColor: i < currentExercise ? colors.success : i === currentExercise ? colors.primary : colors.muted }]}>
-                {i < currentExercise ? (
-                  <Feather name="check" size={12} color="#fff" />
-                ) : (
-                  <Text style={[styles.exerciseNumText, { color: i === currentExercise ? "#fff" : colors.mutedForeground }]}>{i + 1}</Text>
-                )}
+          {workout.exercises.map((e, i) => {
+            const hasVideo = !!exerciseVideos[e.name.toLowerCase()];
+            const isUploading = uploadingFor === e.name;
+            const isCurrent = i === currentExercise;
+            return (
+              <View
+                key={i}
+                style={[
+                  styles.exerciseRow,
+                  {
+                    backgroundColor: isCurrent ? colors.primary + "15" : colors.card,
+                    borderColor: isCurrent ? colors.primary : colors.border,
+                  },
+                ]}
+              >
+                <View style={[styles.exerciseNumCircle, { backgroundColor: i < currentExercise ? colors.success : isCurrent ? colors.primary : colors.muted }]}>
+                  {i < currentExercise ? (
+                    <Feather name="check" size={12} color="#fff" />
+                  ) : (
+                    <Text style={[styles.exerciseNumText, { color: isCurrent ? "#fff" : colors.mutedForeground }]}>{i + 1}</Text>
+                  )}
+                </View>
+                <Text style={[styles.exerciseRowName, { color: colors.foreground }]}>{e.name}</Text>
+                <View style={styles.exerciseRowActions}>
+                  <Text style={[styles.exerciseRowMeta, { color: colors.mutedForeground }]}>
+                    {e.durationSeconds ? `${e.durationSeconds}s` : `${e.sets}×${e.reps}`}
+                  </Text>
+                  {hasVideo && (
+                    <View style={[styles.videoBadge, { backgroundColor: colors.primary + "20" }]}>
+                      <Feather name="video" size={11} color={colors.primary} />
+                    </View>
+                  )}
+                  {isAdmin && (
+                    <TouchableOpacity
+                      onPress={() => hasVideo ? handleDeleteVideo(e.name) : handleUploadVideo(e.name)}
+                      disabled={isUploading}
+                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                      style={[styles.rowUploadBtn, { backgroundColor: hasVideo ? colors.destructive + "15" : colors.muted }]}
+                    >
+                      <Feather
+                        name={isUploading ? "loader" : hasVideo ? "trash-2" : "upload"}
+                        size={12}
+                        color={hasVideo ? colors.destructive : colors.mutedForeground}
+                      />
+                    </TouchableOpacity>
+                  )}
+                </View>
               </View>
-              <Text style={[styles.exerciseRowName, { color: colors.foreground }]}>{e.name}</Text>
-              <Text style={[styles.exerciseRowMeta, { color: colors.mutedForeground }]}>
-                {e.durationSeconds ? `${e.durationSeconds}s` : `${e.sets}×${e.reps}`}
-              </Text>
-            </View>
-          ))}
+            );
+          })}
         </View>
       </ScrollView>
 
@@ -269,6 +411,31 @@ const styles = StyleSheet.create({
   progressBarOuter: { flex: 1, height: 4, backgroundColor: "#eee", borderRadius: 2, overflow: "hidden" },
   progressBarInner: { height: 4, borderRadius: 2 },
   scroll: { flexGrow: 1 },
+
+  // Video hero
+  videoHero: { position: "relative", backgroundColor: "#000", height: 220 },
+  videoPlayer: { width: "100%", height: 220 },
+  videoLoading: { height: 220, justifyContent: "center", alignItems: "center", backgroundColor: "#111" },
+  videoHeroOverlay: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 12,
+    backgroundColor: "rgba(0,0,0,0.45)",
+  },
+  videoExerciseNumber: { fontSize: 11, color: "rgba(255,255,255,0.7)", fontWeight: "600" as const },
+  videoExerciseName: { fontSize: 18, color: "#fff", fontWeight: "800" as const },
+  videoDeleteBtn: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    borderRadius: 16,
+    padding: 6,
+  },
+
+  // Color hero (no video)
   colorHero: {
     minHeight: 180,
     justifyContent: "center",
@@ -287,6 +454,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   timerText: { fontSize: 28, fontWeight: "800" as const },
+  uploadVideoBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginTop: 4,
+  },
+  uploadVideoBtnText: { color: "#fff", fontSize: 13, fontWeight: "700" as const },
+
+  // Content
   content: { padding: 16, gap: 12 },
   instructionCard: { padding: 16, borderRadius: 16, borderWidth: 1, gap: 10 },
   instructionLabel: { fontSize: 12, fontWeight: "600" as const, textTransform: "uppercase" as const, letterSpacing: 0.5 },
@@ -295,15 +474,18 @@ const styles = StyleSheet.create({
   metaChip: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8 },
   metaText: { fontSize: 12, fontWeight: "600" as const },
   allExercisesLabel: { fontSize: 13, fontWeight: "600" as const, textTransform: "uppercase" as const, letterSpacing: 0.5, marginTop: 4 },
+
   exerciseRow: { flexDirection: "row", alignItems: "center", padding: 12, borderRadius: 12, borderWidth: 1, gap: 12 },
   exerciseNumCircle: { width: 28, height: 28, borderRadius: 14, justifyContent: "center", alignItems: "center" },
   exerciseNumText: { fontSize: 12, fontWeight: "700" as const },
   exerciseRowName: { flex: 1, fontSize: 14, fontWeight: "600" as const },
+  exerciseRowActions: { flexDirection: "row", alignItems: "center", gap: 6 },
   exerciseRowMeta: { fontSize: 12 },
-  controls: {
-    padding: 16,
-    borderTopWidth: 1,
-  },
+  videoBadge: { borderRadius: 6, padding: 4 },
+  rowUploadBtn: { borderRadius: 6, padding: 5 },
+
+  // Controls
+  controls: { padding: 16, borderTopWidth: 1 },
   startBtn: {
     flexDirection: "row",
     paddingVertical: 18,
@@ -325,6 +507,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   nextBtnText: { color: "#fff", fontSize: 17, fontWeight: "700" as const },
+
+  // Completed
   completedInner: { flex: 1, paddingHorizontal: 24, alignItems: "center", gap: 20 },
   completedIcon: { width: 100, height: 100, borderRadius: 50, justifyContent: "center", alignItems: "center" },
   completedTitle: { fontSize: 28, fontWeight: "800" as const },
@@ -333,12 +517,6 @@ const styles = StyleSheet.create({
   statItem: { flex: 1, alignItems: "center", gap: 4 },
   statValue: { fontSize: 22, fontWeight: "800" as const },
   statLabel: { fontSize: 12 },
-  doneBtn: {
-    width: "100%",
-    paddingVertical: 18,
-    borderRadius: 16,
-    alignItems: "center",
-    marginTop: 20,
-  },
+  doneBtn: { width: "100%", paddingVertical: 18, borderRadius: 16, alignItems: "center", marginTop: 20 },
   doneBtnText: { fontSize: 17, fontWeight: "700" as const },
 });
