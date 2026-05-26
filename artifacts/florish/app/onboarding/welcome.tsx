@@ -23,9 +23,12 @@ export default function WelcomeScreen() {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Image
-        source={require("@/assets/images/hero.png")}
+        source={require("@/assets/images/hero.jpg")}
         style={styles.heroImage}
         contentFit="cover"
+        priority="high"
+        placeholder={{ color: "#EDD5C8" }}
+        transition={200}
       />
       <View style={[styles.overlay, { backgroundColor: colors.overlay }]} />
 

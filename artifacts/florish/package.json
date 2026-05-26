@@ -57,6 +57,7 @@
   },
   "dependencies": {
     "@expo-google-fonts/outfit": "^0.4.3",
+    "expo-av": "^16.0.8",
     "expo-camera": "^56.0.7",
     "react-native-purchases": "^10.1.2"
   }

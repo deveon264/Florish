@@ -11,6 +11,7 @@ const KEYS = {
   WEIGHT_LOG: "florish_weight_log",
   PROGRESS_PHOTOS: "florish_progress_photos",
   STREAK: "florish_streak",
+  CUSTOM_VIDEOS: "florish_custom_videos",
 };
 
 export type UserProfile = {
@@ -278,6 +279,43 @@ export async function updateStreak(): Promise<number> {
 
   await AsyncStorage.setItem(KEYS.STREAK, streak.toString());
   return streak;
+}
+
+// Custom workout videos (admin-uploaded)
+export type CustomWorkoutVideo = {
+  id: string;
+  uri: string;
+  title: string;
+  duration?: number;
+  thumbnail?: string;
+  createdAt: string;
+};
+
+export async function getCustomWorkoutVideos(): Promise<CustomWorkoutVideo[]> {
+  const raw = await AsyncStorage.getItem(KEYS.CUSTOM_VIDEOS);
+  return raw ? JSON.parse(raw) : [];
+}
+
+export async function addCustomWorkoutVideo(
+  data: Omit<CustomWorkoutVideo, "id" | "createdAt">
+): Promise<CustomWorkoutVideo> {
+  const all = await getCustomWorkoutVideos();
+  const entry: CustomWorkoutVideo = {
+    ...data,
+    id: uid(),
+    createdAt: new Date().toISOString(),
+  };
+  all.push(entry);
+  await AsyncStorage.setItem(KEYS.CUSTOM_VIDEOS, JSON.stringify(all));
+  return entry;
+}
+
+export async function deleteCustomWorkoutVideo(id: string): Promise<void> {
+  const all = await getCustomWorkoutVideos();
+  await AsyncStorage.setItem(
+    KEYS.CUSTOM_VIDEOS,
+    JSON.stringify(all.filter((v) => v.id !== id))
+  );
 }
 
 export async function clearAll(): Promise<void> {

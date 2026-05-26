@@ -10,11 +10,26 @@ import {
   clearAll,
 } from "@/lib/storage";
 
+const ADMIN_EMAIL = "6ixbelowna@gmail.com";
+
+const DEV_ADMIN_PROFILE: UserProfile = {
+  name: "Dillish",
+  email: ADMIN_EMAIL,
+  fitnessGoal: "general_fitness",
+  age: 28,
+  weightKg: 65,
+  heightCm: 170,
+  dailyWaterGoalMl: 2500,
+  dailyCalorieGoal: 1800,
+  createdAt: new Date().toISOString(),
+};
+
 type AuthState = {
   user: UserProfile | null;
   onboardingComplete: boolean;
   paywallPassed: boolean;
   isLoading: boolean;
+  isAdmin: boolean;
   updateUser: (profile: UserProfile) => Promise<void>;
   completeOnboarding: () => Promise<void>;
   completePaywall: () => Promise<void>;
@@ -33,6 +48,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const load = async () => {
     setIsLoading(true);
     try {
+      if (__DEV__) {
+        await saveUserProfile(DEV_ADMIN_PROFILE);
+        await setOnboardingComplete();
+        await setPaywallPassed();
+        setUser(DEV_ADMIN_PROFILE);
+        setOnboardingState(true);
+        setPaywallState(true);
+        return;
+      }
       const [profile, onb, paywall] = await Promise.all([
         getUserProfile(),
         isOnboardingComplete(),
@@ -72,6 +96,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setPaywallState(false);
   };
 
+  const isAdmin = user?.email === ADMIN_EMAIL;
+
   return (
     <AuthContext.Provider
       value={{
@@ -79,6 +105,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         onboardingComplete,
         paywallPassed,
         isLoading,
+        isAdmin,
         updateUser,
         completeOnboarding,
         completePaywall,
