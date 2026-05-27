@@ -112,7 +112,7 @@ export async function setSessionActive(active: boolean): Promise<void> {
 }
 
 export async function clearSession(): Promise<void> {
-  await AsyncStorage.multiRemove([KEYS.SESSION_ACTIVE, KEYS.ONBOARDING_COMPLETE, KEYS.PAYWALL_PASSED]);
+  await setSessionActive(false);
 }
 
 // Water
