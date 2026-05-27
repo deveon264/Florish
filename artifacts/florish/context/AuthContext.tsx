@@ -121,11 +121,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signIn = async (email: string): Promise<{ success: boolean; error?: string }> => {
+    const normalised = email.trim().toLowerCase();
+
+    // Admin account — always restore the dev profile regardless of what's in storage
+    if (normalised === ADMIN_EMAIL.toLowerCase()) {
+      await saveUserProfile(DEV_ADMIN_PROFILE);
+      await setOnboardingComplete();
+      await setPaywallPassed();
+      await setSessionActive(true);
+      setUser(DEV_ADMIN_PROFILE);
+      setOnboardingState(true);
+      setPaywallState(true);
+      setHasProfile(true);
+      return { success: true };
+    }
+
+    // Regular user — look up their saved profile
     const profile = await getUserProfile();
     if (!profile) {
       return { success: false, error: "No account found. Please create an account first." };
     }
-    if (profile.email.toLowerCase() !== email.trim().toLowerCase()) {
+    if (profile.email.toLowerCase() !== normalised) {
       return { success: false, error: "No account found with that email address." };
     }
     const [onb, paywall] = await Promise.all([isOnboardingComplete(), isPaywallPassed()]);
