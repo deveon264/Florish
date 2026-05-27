@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   Alert,
+  KeyboardAvoidingView,
   Modal,
   Platform,
   ScrollView,
@@ -8,6 +9,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -152,9 +154,16 @@ export default function WaterScreen() {
         )}
       </ScrollView>
 
-      <Modal visible={customModal} transparent animationType="slide" presentationStyle="pageSheet">
-        <View style={[styles.customModal, { backgroundColor: colors.background }]}>
-          <View style={[styles.customModalInner, { paddingBottom: botPad + 24 }]}>
+      <Modal visible={customModal} transparent animationType="slide">
+        <TouchableWithoutFeedback onPress={() => setCustomModal(false)}>
+          <View style={styles.customModalOverlay} />
+        </TouchableWithoutFeedback>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.customModalKAV}
+        >
+          <View style={[styles.customModalSheet, { backgroundColor: colors.card, paddingBottom: botPad + 16 }]}>
+            <View style={styles.customModalHandle} />
             <Text style={[styles.customModalTitle, { color: colors.foreground }]}>Custom Amount</Text>
             <View style={styles.customInputRow}>
               <TextInput
@@ -165,13 +174,15 @@ export default function WaterScreen() {
                 onChangeText={setCustomMl}
                 keyboardType="numeric"
                 autoFocus
+                returnKeyType="done"
+                onSubmitEditing={handleCustom}
               />
               <Text style={[styles.customUnit, { color: colors.foreground }]}>ml</Text>
             </View>
             <View style={styles.customModalBtns}>
               <TouchableOpacity
                 style={[styles.customModalBtn, { backgroundColor: colors.muted }]}
-                onPress={() => setCustomModal(false)}
+                onPress={() => { setCustomModal(false); setCustomMl(""); }}
               >
                 <Text style={[styles.customModalBtnText, { color: colors.foreground }]}>Cancel</Text>
               </TouchableOpacity>
@@ -183,7 +194,7 @@ export default function WaterScreen() {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
     </View>
   );
@@ -258,8 +269,10 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   goalBannerText: { fontSize: 14, fontWeight: "600" as const, flex: 1, lineHeight: 20 },
-  customModal: { flex: 1, justifyContent: "flex-end" },
-  customModalInner: { padding: 24, gap: 20 },
+  customModalOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.4)" },
+  customModalKAV: { position: "absolute" as const, bottom: 0, left: 0, right: 0 },
+  customModalSheet: { borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, gap: 20 },
+  customModalHandle: { width: 40, height: 4, borderRadius: 2, backgroundColor: "#ccc", alignSelf: "center" as const, marginBottom: 4 },
   customModalTitle: { fontSize: 20, fontWeight: "800" as const },
   customInputRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   customInput: { flex: 1, paddingHorizontal: 20, paddingVertical: 16, borderRadius: 14, borderWidth: 1, fontSize: 28, fontWeight: "800" as const, textAlign: "center" as const },
