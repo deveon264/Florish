@@ -4,6 +4,7 @@ const KEYS = {
   USER_PROFILE: "florish_user_profile",
   ONBOARDING_COMPLETE: "florish_onboarding_complete",
   PAYWALL_PASSED: "florish_paywall_passed",
+  SESSION_ACTIVE: "florish_session_active",
   WATER_LOG: "florish_water_log",
   MEAL_LOG: "florish_meal_log",
   WORKOUT_HISTORY: "florish_workout_history",
@@ -99,6 +100,19 @@ export async function isPaywallPassed(): Promise<boolean> {
 
 export async function setPaywallPassed(): Promise<void> {
   await AsyncStorage.setItem(KEYS.PAYWALL_PASSED, "true");
+}
+
+export async function isSessionActive(): Promise<boolean> {
+  const val = await AsyncStorage.getItem(KEYS.SESSION_ACTIVE);
+  return val === "true";
+}
+
+export async function setSessionActive(active: boolean): Promise<void> {
+  await AsyncStorage.setItem(KEYS.SESSION_ACTIVE, active ? "true" : "false");
+}
+
+export async function clearSession(): Promise<void> {
+  await AsyncStorage.multiRemove([KEYS.SESSION_ACTIVE, KEYS.ONBOARDING_COMPLETE, KEYS.PAYWALL_PASSED]);
 }
 
 // Water

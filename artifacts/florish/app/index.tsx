@@ -5,7 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useColors } from "@/hooks/useColors";
 
 export default function EntryScreen() {
-  const { user, onboardingComplete, paywallPassed, isLoading } = useAuth();
+  const { user, onboardingComplete, paywallPassed, isLoading, hasProfile } = useAuth();
   const colors = useColors();
 
   if (isLoading) {
@@ -16,7 +16,11 @@ export default function EntryScreen() {
     );
   }
 
+  // Not logged in — route to sign-in if they have an account, otherwise full onboarding
   if (!user || !onboardingComplete) {
+    if (hasProfile) {
+      return <Redirect href="/onboarding/signin" />;
+    }
     return <Redirect href="/onboarding/welcome" />;
   }
 

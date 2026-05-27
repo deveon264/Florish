@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   UserProfile,
   getUserProfile,
@@ -7,10 +8,13 @@ import {
   setOnboardingComplete,
   isPaywallPassed,
   setPaywallPassed,
-  clearAll,
+  isSessionActive,
+  setSessionActive,
+  clearSession,
 } from "@/lib/storage";
 
 const ADMIN_EMAIL = "6ixbelowna@gmail.com";
+const SESSION_KEY = "florish_session_active";
 
 const DEV_ADMIN_PROFILE: UserProfile = {
   name: "Dillish",
@@ -30,9 +34,11 @@ type AuthState = {
   paywallPassed: boolean;
   isLoading: boolean;
   isAdmin: boolean;
+  hasProfile: boolean;
   updateUser: (profile: UserProfile) => Promise<void>;
   completeOnboarding: () => Promise<void>;
   completePaywall: () => Promise<void>;
+  signIn: (email: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   reload: () => Promise<void>;
 };
@@ -43,25 +49,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [onboardingComplete, setOnboardingState] = useState(false);
   const [paywallPassed, setPaywallState] = useState(false);
+  const [hasProfile, setHasProfile] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   const load = async () => {
     setIsLoading(true);
     try {
       if (__DEV__) {
+        // In dev mode, auto-login admin UNLESS the user explicitly logged out
+        const sessionVal = await AsyncStorage.getItem(SESSION_KEY);
+        if (sessionVal === "false") {
+          // User logged out — show sign-in screen, but flag that profile exists
+          setUser(null);
+          setOnboardingState(false);
+          setPaywallState(false);
+          setHasProfile(true);
+          return;
+        }
+        // First launch or session not cleared — auto-login admin
         await saveUserProfile(DEV_ADMIN_PROFILE);
         await setOnboardingComplete();
         await setPaywallPassed();
+        await setSessionActive(true);
         setUser(DEV_ADMIN_PROFILE);
         setOnboardingState(true);
         setPaywallState(true);
+        setHasProfile(true);
         return;
       }
-      const [profile, onb, paywall] = await Promise.all([
+
+      // Production: require active session
+      const [profile, onb, paywall, session] = await Promise.all([
         getUserProfile(),
         isOnboardingComplete(),
         isPaywallPassed(),
+        isSessionActive(),
       ]);
+      setHasProfile(!!profile);
+      if (!session) {
+        setUser(null);
+        setOnboardingState(false);
+        setPaywallState(false);
+        return;
+      }
       setUser(profile);
       setOnboardingState(onb);
       setPaywallState(paywall);
@@ -81,6 +111,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const completeOnboarding = async () => {
     await setOnboardingComplete();
+    await setSessionActive(true);
     setOnboardingState(true);
   };
 
@@ -89,11 +120,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setPaywallState(true);
   };
 
+  const signIn = async (email: string): Promise<{ success: boolean; error?: string }> => {
+    const profile = await getUserProfile();
+    if (!profile) {
+      return { success: false, error: "No account found. Please create an account first." };
+    }
+    if (profile.email.toLowerCase() !== email.trim().toLowerCase()) {
+      return { success: false, error: "No account found with that email address." };
+    }
+    const [onb, paywall] = await Promise.all([isOnboardingComplete(), isPaywallPassed()]);
+    await setSessionActive(true);
+    setUser(profile);
+    setOnboardingState(onb);
+    setPaywallState(paywall);
+    return { success: true };
+  };
+
   const logout = async () => {
-    await clearAll();
+    // Keep profile + fitness data; only clear the session so users can sign back in
+    await clearSession();
     setUser(null);
     setOnboardingState(false);
     setPaywallState(false);
+    // hasProfile stays true — profile still exists in storage for sign-in
   };
 
   const isAdmin = user?.email === ADMIN_EMAIL;
@@ -106,9 +155,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         paywallPassed,
         isLoading,
         isAdmin,
+        hasProfile,
         updateUser,
         completeOnboarding,
         completePaywall,
+        signIn,
         logout,
         reload: load,
       }}

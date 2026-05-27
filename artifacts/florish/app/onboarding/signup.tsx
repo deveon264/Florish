@@ -142,10 +142,12 @@ export default function SignupScreen() {
           <View style={[styles.line, { backgroundColor: colors.border }]} />
         </View>
 
-        <Text style={[styles.loginText, { color: colors.mutedForeground }]}>
-          Already have an account?{" "}
-          <Text style={{ color: colors.primary, fontWeight: "600" as const }}>Sign In</Text>
-        </Text>
+        <TouchableOpacity onPress={() => router.push("/onboarding/signin")}>
+          <Text style={[styles.loginText, { color: colors.mutedForeground }]}>
+            Already have an account?{" "}
+            <Text style={{ color: colors.primary, fontWeight: "600" as const }}>Sign In</Text>
+          </Text>
+        </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
   );
