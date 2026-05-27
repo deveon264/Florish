@@ -17,7 +17,7 @@ const ADMIN_EMAIL = "6ixbelowna@gmail.com";
 const SESSION_KEY = "florish_session_active";
 
 const DEV_ADMIN_PROFILE: UserProfile = {
-  name: "Dillish",
+  name: "Ndili",
   email: ADMIN_EMAIL,
   fitnessGoal: "general_fitness",
   age: 28,
