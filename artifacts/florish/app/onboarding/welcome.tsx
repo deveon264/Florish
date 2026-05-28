@@ -63,6 +63,17 @@ export default function WelcomeScreen() {
             ))}
           </View>
 
+          <TouchableOpacity
+            style={styles.signInBtn}
+            onPress={() => router.push("/onboarding/signin")}
+            activeOpacity={0.75}
+          >
+            <Text style={styles.signInText}>
+              Already have an account?{" "}
+              <Text style={[styles.signInLink, { color: colors.primary }]}>Sign In</Text>
+            </Text>
+          </TouchableOpacity>
+
           <Text style={[styles.disclaimer, { color: "rgba(255,255,255,0.5)" }]}>
             By continuing you agree to our Terms & Privacy Policy
           </Text>
@@ -138,6 +149,18 @@ const styles = StyleSheet.create({
   featureText: {
     fontSize: 15,
     fontWeight: "500" as const,
+  },
+  signInBtn: {
+    alignItems: "center",
+    paddingVertical: 4,
+  },
+  signInText: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.7)",
+    textAlign: "center",
+  },
+  signInLink: {
+    fontWeight: "700" as const,
   },
   disclaimer: {
     fontSize: 12,
