@@ -288,19 +288,20 @@ export default function WorkoutDetailScreen() {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView contentContainerStyle={[styles.scroll, { paddingBottom: botPad + 24 }]} showsVerticalScrollIndicator={false}>
-        {/* Hero: video player if available, else coloured banner */}
+        {/* Controls row — always sits below the Dynamic Island / notch */}
+        <View style={[styles.heroControls, { paddingTop: topPad + 8, backgroundColor: currentVideo ? "#000" : workout.thumbnailColor + "33" }]}>
+          <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <Feather name="x" size={24} color={currentVideo ? "#fff" : colors.foreground} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleToggleFav} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <Feather name="heart" size={22} color={isFav ? colors.primary : currentVideo ? "rgba(255,255,255,0.85)" : colors.mutedForeground} />
+          </TouchableOpacity>
+        </View>
+
+        {/* Hero: video player if available, else coloured banner — always below safe area */}
         {currentVideo ? (
-          <View style={[styles.videoHero, { height: 220 + topPad + 48 }]}>
-            <ExerciseVideoPlayer uri={currentVideo.uri} shouldPlay={isActive} height={220 + topPad + 48} />
-            {/* Dark gradient behind top controls */}
-            <View style={[styles.heroTopGradient, { paddingTop: topPad + 8 }]}>
-              <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-                <Feather name="x" size={24} color="#fff" />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={handleToggleFav} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-                <Feather name="heart" size={22} color={isFav ? colors.primary : "rgba(255,255,255,0.85)"} />
-              </TouchableOpacity>
-            </View>
+          <View style={styles.videoHero}>
+            <ExerciseVideoPlayer uri={currentVideo.uri} shouldPlay={isActive} height={220} />
             {isAdmin && (
               <TouchableOpacity
                 style={styles.videoDeleteBtn}
@@ -311,16 +312,7 @@ export default function WorkoutDetailScreen() {
             )}
           </View>
         ) : (
-          <View style={[styles.colorHero, { backgroundColor: workout.thumbnailColor + "33", paddingTop: topPad + 56 }]}>
-            {/* Controls row overlaid at top */}
-            <View style={[styles.heroTopGradient, { paddingTop: topPad + 8, backgroundColor: "transparent" }]}>
-              <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-                <Feather name="x" size={24} color={colors.foreground} />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={handleToggleFav} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-                <Feather name="heart" size={22} color={isFav ? colors.primary : colors.mutedForeground} />
-              </TouchableOpacity>
-            </View>
+          <View style={[styles.colorHero, { backgroundColor: workout.thumbnailColor + "33" }]}>
             {isAdmin && ex && (
               <TouchableOpacity
                 style={[styles.uploadVideoBtn, { backgroundColor: colors.primary }]}
@@ -548,16 +540,12 @@ export default function WorkoutDetailScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  heroTopGradient: {
-    position: "absolute" as const,
-    top: 0, left: 0, right: 0,
+  heroControls: {
     flexDirection: "row" as const,
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingBottom: 12,
-    backgroundColor: "transparent",
-    zIndex: 10,
   },
   progressBarOuter: { flex: 1, height: 4, backgroundColor: "#eee", borderRadius: 2, overflow: "hidden" },
   progressBarInner: { height: 4, borderRadius: 2 },
