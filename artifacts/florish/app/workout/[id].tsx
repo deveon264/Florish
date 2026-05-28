@@ -290,7 +290,7 @@ export default function WorkoutDetailScreen() {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView contentContainerStyle={[styles.scroll, { paddingBottom: botPad + 24 }]} showsVerticalScrollIndicator={false}>
-        {/* ── Unified hero banner ── */}
+        {/* ── Compact hero banner ── */}
         <View style={[styles.heroBanner, { paddingTop: topPad }]}>
           {/* Background: workout image */}
           <Image
@@ -299,53 +299,55 @@ export default function WorkoutDetailScreen() {
             resizeMode="cover"
           />
 
-          {/* Dark gradient overlay so text + buttons are always readable */}
+          {/* Gradient: transparent at top, dark at bottom so text pops */}
           <LinearGradient
-            colors={["rgba(0,0,0,0.55)", "rgba(0,0,0,0.10)", "rgba(0,0,0,0.65)"]}
-            locations={[0, 0.45, 1]}
+            colors={["rgba(0,0,0,0.15)", "rgba(0,0,0,0.72)"]}
+            locations={[0, 1]}
             style={StyleSheet.absoluteFill}
           />
 
-          {/* Top row: back + favourite */}
+          {/* Back (left) and heart (right) — sit just below notch */}
           <View style={styles.heroTopRow}>
             <TouchableOpacity
-              style={styles.heroIconBtn}
               onPress={() => router.back()}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
             >
-              <Feather name="arrow-left" size={20} color="#fff" />
+              <Feather name="arrow-left" size={22} color="#fff" />
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.heroIconBtn, isFav && { backgroundColor: colors.primary }]}
               onPress={handleToggleFav}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
             >
-              <Feather name="heart" size={18} color="#fff" />
+              <Feather
+                name={isFav ? "heart" : "heart"}
+                size={21}
+                color={isFav ? colors.primary : "#fff"}
+              />
             </TouchableOpacity>
           </View>
 
-          {/* Bottom: workout title + meta */}
+          {/* Tags → Title → Stats stacked at the bottom */}
           <View style={styles.heroBottom}>
             <View style={styles.heroTags}>
               <View style={[styles.heroTag, { backgroundColor: colors.primary }]}>
                 <Text style={styles.heroTagText}>{workout.category}</Text>
               </View>
-              <View style={[styles.heroTag, { backgroundColor: "rgba(255,255,255,0.2)" }]}>
+              <View style={[styles.heroTag, { backgroundColor: "rgba(255,255,255,0.18)" }]}>
                 <Text style={styles.heroTagText}>{workout.difficulty}</Text>
               </View>
             </View>
             <Text style={styles.heroTitle}>{workout.title}</Text>
             <View style={styles.heroMeta}>
               <View style={styles.heroMetaItem}>
-                <Feather name="clock" size={13} color="rgba(255,255,255,0.8)" />
+                <Feather name="clock" size={12} color="rgba(255,255,255,0.85)" />
                 <Text style={styles.heroMetaText}>{workout.durationMinutes} min</Text>
               </View>
               <View style={styles.heroMetaItem}>
-                <Feather name="zap" size={13} color="rgba(255,255,255,0.8)" />
+                <Feather name="zap" size={12} color="rgba(255,255,255,0.85)" />
                 <Text style={styles.heroMetaText}>{workout.caloriesBurned} cal</Text>
               </View>
               <View style={styles.heroMetaItem}>
-                <Feather name="list" size={13} color="rgba(255,255,255,0.8)" />
+                <Feather name="align-justify" size={12} color="rgba(255,255,255,0.85)" />
                 <Text style={styles.heroMetaText}>{workout.exercises.length} exercises</Text>
               </View>
             </View>
@@ -593,7 +595,7 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
   heroBanner: {
-    height: 280,
+    height: 195,
     position: "relative" as const,
     overflow: "hidden" as const,
     justifyContent: "space-between",
@@ -607,9 +609,9 @@ const styles = StyleSheet.create({
     flexDirection: "row" as const,
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 16,
+    paddingHorizontal: 18,
     paddingTop: 10,
-    paddingBottom: 8,
+    paddingBottom: 4,
   },
   heroIconBtn: {
     width: 38,
@@ -621,35 +623,35 @@ const styles = StyleSheet.create({
   },
   heroBottom: {
     paddingHorizontal: 18,
-    paddingBottom: 20,
-    gap: 8,
+    paddingBottom: 16,
+    gap: 6,
   },
   heroTags: {
     flexDirection: "row" as const,
     gap: 8,
   },
   heroTag: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
     borderRadius: 20,
   },
   heroTagText: {
     fontSize: 11,
     fontWeight: "700" as const,
     color: "#fff",
-    letterSpacing: 0.5,
+    letterSpacing: 0.6,
     textTransform: "uppercase" as const,
   },
   heroTitle: {
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: "800" as const,
     color: "#fff",
-    letterSpacing: -0.5,
-    lineHeight: 30,
+    letterSpacing: -0.3,
+    lineHeight: 28,
   },
   heroMeta: {
     flexDirection: "row" as const,
-    gap: 16,
+    gap: 18,
   },
   heroMetaItem: {
     flexDirection: "row" as const,
@@ -658,7 +660,7 @@ const styles = StyleSheet.create({
   },
   heroMetaText: {
     fontSize: 13,
-    color: "rgba(255,255,255,0.85)",
+    color: "rgba(255,255,255,0.88)",
     fontWeight: "500" as const,
   },
   progressBarOuter: { flex: 1, height: 4, backgroundColor: "#eee", borderRadius: 2, overflow: "hidden" },
