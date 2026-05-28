@@ -161,13 +161,6 @@ export default function ProfileScreen() {
           ))}
         </View>
 
-        <View style={[styles.dillishCard, { backgroundColor: colors.primary + "10", borderColor: colors.primary + "30" }]}>
-          <Text style={[styles.dillishTitle, { color: colors.primaryDark }]}>About Dillish</Text>
-          <Text style={[styles.dillishText, { color: colors.foreground }]}>
-            Florish was created with Dillish to help women worldwide achieve their fitness goals through personalised guidance, expert workouts, and smart nutrition tracking.
-          </Text>
-        </View>
-
         <TouchableOpacity
           style={[styles.logoutBtn, { borderColor: colors.destructive }]}
           onPress={() => setLogoutModal(true)}
