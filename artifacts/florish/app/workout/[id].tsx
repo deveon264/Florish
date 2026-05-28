@@ -24,7 +24,7 @@ import {
 } from "@/lib/storage";
 import * as Haptics from "expo-haptics";
 
-function ExerciseVideoPlayer({ uri, shouldPlay }: { uri: string; shouldPlay: boolean }) {
+function ExerciseVideoPlayer({ uri, shouldPlay, height = 220 }: { uri: string; shouldPlay: boolean; height?: number }) {
   const [VideoComp, setVideoComp] = useState<any>(null);
   const videoRef = useRef<any>(null);
 
@@ -56,9 +56,9 @@ function ExerciseVideoPlayer({ uri, shouldPlay }: { uri: string; shouldPlay: boo
     <Video
       ref={videoRef}
       source={{ uri }}
-      style={styles.videoPlayer}
+      style={[styles.videoPlayer, { height }]}
       useNativeControls
-      resizeMode={ResizeMode.CONTAIN}
+      resizeMode={ResizeMode.COVER}
       shouldPlay={shouldPlay}
       isLooping
     />
@@ -275,23 +275,23 @@ export default function WorkoutDetailScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={[styles.topBar, { paddingTop: topPad + 8, backgroundColor: colors.card, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <Feather name="x" size={24} color={colors.foreground} />
-        </TouchableOpacity>
-        <View style={styles.progressBarOuter}>
-          <View style={[styles.progressBarInner, { backgroundColor: colors.primary, width: `${progress * 100}%` as any }]} />
-        </View>
-        <TouchableOpacity onPress={handleToggleFav} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <Feather name="heart" size={22} color={isFav ? colors.primary : colors.mutedForeground} />
-        </TouchableOpacity>
-      </View>
-
       <ScrollView contentContainerStyle={[styles.scroll, { paddingBottom: botPad + 24 }]} showsVerticalScrollIndicator={false}>
         {/* Hero: video player if available, else coloured banner */}
         {currentVideo ? (
-          <View style={styles.videoHero}>
-            <ExerciseVideoPlayer uri={currentVideo.uri} shouldPlay={isActive} />
+          <View style={[styles.videoHero, { height: 220 + topPad + 48 }]}>
+            <ExerciseVideoPlayer uri={currentVideo.uri} shouldPlay={isActive} height={220 + topPad + 48} />
+            {/* Dark gradient behind top controls */}
+            <View style={[styles.heroTopGradient, { paddingTop: topPad + 8 }]}>
+              <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <Feather name="x" size={24} color="#fff" />
+              </TouchableOpacity>
+              <View style={[styles.progressBarOuter, { backgroundColor: "rgba(255,255,255,0.3)" }]}>
+                <View style={[styles.progressBarInner, { backgroundColor: "#fff", width: `${progress * 100}%` as any }]} />
+              </View>
+              <TouchableOpacity onPress={handleToggleFav} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <Feather name="heart" size={22} color={isFav ? colors.primary : "rgba(255,255,255,0.85)"} />
+              </TouchableOpacity>
+            </View>
             <View style={styles.videoHeroOverlay}>
               <View style={styles.videoOverlayRow}>
                 <View>
@@ -330,7 +330,19 @@ export default function WorkoutDetailScreen() {
             )}
           </View>
         ) : (
-          <View style={[styles.colorHero, { backgroundColor: workout.thumbnailColor + "33" }]}>
+          <View style={[styles.colorHero, { backgroundColor: workout.thumbnailColor + "33", paddingTop: topPad + 56 }]}>
+            {/* Controls row overlaid at top */}
+            <View style={[styles.heroTopGradient, { paddingTop: topPad + 8, backgroundColor: "transparent" }]}>
+              <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <Feather name="x" size={24} color={colors.foreground} />
+              </TouchableOpacity>
+              <View style={styles.progressBarOuter}>
+                <View style={[styles.progressBarInner, { backgroundColor: colors.primary, width: `${progress * 100}%` as any }]} />
+              </View>
+              <TouchableOpacity onPress={handleToggleFav} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <Feather name="heart" size={22} color={isFav ? colors.primary : colors.mutedForeground} />
+              </TouchableOpacity>
+            </View>
             <Text style={[styles.exerciseNumber, { color: colors.mutedForeground }]}>
               {currentExercise + 1} / {workout.exercises.length}
             </Text>
@@ -552,20 +564,23 @@ export default function WorkoutDetailScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  topBar: {
-    flexDirection: "row",
+  heroTopGradient: {
+    position: "absolute" as const,
+    top: 0, left: 0, right: 0,
+    flexDirection: "row" as const,
     alignItems: "center",
     paddingHorizontal: 16,
     paddingBottom: 12,
     gap: 12,
-    borderBottomWidth: 1,
+    backgroundColor: "rgba(0,0,0,0.35)",
+    zIndex: 10,
   },
   progressBarOuter: { flex: 1, height: 4, backgroundColor: "#eee", borderRadius: 2, overflow: "hidden" },
   progressBarInner: { height: 4, borderRadius: 2 },
   scroll: { flexGrow: 1 },
 
   // Video hero
-  videoHero: { position: "relative", backgroundColor: "#000", height: 220 },
+  videoHero: { position: "relative" as const, backgroundColor: "#000", height: 220 },
   videoPlayer: { width: "100%", height: 220 },
   videoLoading: { height: 220, justifyContent: "center", alignItems: "center", backgroundColor: "#111" },
   videoHeroOverlay: {
