@@ -44,3 +44,8 @@ localPort = 26262
 externalPort = 3003
 
 [nix]
+
+[userenv]
+
+[userenv.shared]
+SEED_SECRET = "e6098ae30735831bf323a4bf205114e4496842d4"
