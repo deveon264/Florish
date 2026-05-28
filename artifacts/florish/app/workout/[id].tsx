@@ -1,11 +1,9 @@
 import { router, useLocalSearchParams } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
-import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Alert,
-  Image,
   Platform,
   ScrollView,
   StyleSheet,
@@ -291,28 +289,14 @@ export default function WorkoutDetailScreen() {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView contentContainerStyle={[styles.scroll, { paddingBottom: botPad + 24 }]} showsVerticalScrollIndicator={false}>
         {/* ── Compact hero banner ── */}
-        <View style={[styles.heroBanner, { paddingTop: topPad }]}>
-          {/* Background: workout image */}
-          <Image
-            source={workout.thumbnailImage}
-            style={styles.heroBg}
-            resizeMode="cover"
-          />
-
-          {/* Gradient: transparent at top, dark at bottom so text pops */}
-          <LinearGradient
-            colors={["rgba(0,0,0,0.15)", "rgba(0,0,0,0.72)"]}
-            locations={[0, 1]}
-            style={StyleSheet.absoluteFill}
-          />
-
+        <View style={[styles.heroBanner, { paddingTop: topPad, backgroundColor: colors.card }]}>
           {/* Back (left) and heart (right) — sit just below notch */}
           <View style={styles.heroTopRow}>
             <TouchableOpacity
               onPress={() => router.back()}
               hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
             >
-              <Feather name="arrow-left" size={22} color="#fff" />
+              <Feather name="arrow-left" size={22} color={colors.foreground} />
             </TouchableOpacity>
             <TouchableOpacity
               onPress={handleToggleFav}
@@ -321,34 +305,34 @@ export default function WorkoutDetailScreen() {
               <Feather
                 name={isFav ? "heart" : "heart"}
                 size={21}
-                color={isFav ? colors.primary : "#fff"}
+                color={isFav ? colors.primary : colors.mutedForeground}
               />
             </TouchableOpacity>
           </View>
 
           {/* Tags → Title → Stats stacked at the bottom */}
-          <View style={styles.heroBottom}>
+          <View style={[styles.heroBottom, { paddingBottom: 20 }]}>
             <View style={styles.heroTags}>
               <View style={[styles.heroTag, { backgroundColor: colors.primary }]}>
                 <Text style={styles.heroTagText}>{workout.category}</Text>
               </View>
-              <View style={[styles.heroTag, { backgroundColor: "rgba(255,255,255,0.18)" }]}>
-                <Text style={styles.heroTagText}>{workout.difficulty}</Text>
+              <View style={[styles.heroTag, { backgroundColor: colors.muted }]}>
+                <Text style={[styles.heroTagText, { color: colors.mutedForeground }]}>{workout.difficulty}</Text>
               </View>
             </View>
-            <Text style={styles.heroTitle}>{workout.title}</Text>
+            <Text style={[styles.heroTitle, { color: colors.foreground }]}>{workout.title}</Text>
             <View style={styles.heroMeta}>
               <View style={styles.heroMetaItem}>
-                <Feather name="clock" size={12} color="rgba(255,255,255,0.85)" />
-                <Text style={styles.heroMetaText}>{workout.durationMinutes} min</Text>
+                <Feather name="clock" size={12} color={colors.mutedForeground} />
+                <Text style={[styles.heroMetaText, { color: colors.mutedForeground }]}>{workout.durationMinutes} min</Text>
               </View>
               <View style={styles.heroMetaItem}>
-                <Feather name="zap" size={12} color="rgba(255,255,255,0.85)" />
-                <Text style={styles.heroMetaText}>{workout.caloriesBurned} cal</Text>
+                <Feather name="zap" size={12} color={colors.mutedForeground} />
+                <Text style={[styles.heroMetaText, { color: colors.mutedForeground }]}>{workout.caloriesBurned} cal</Text>
               </View>
               <View style={styles.heroMetaItem}>
-                <Feather name="align-justify" size={12} color="rgba(255,255,255,0.85)" />
-                <Text style={styles.heroMetaText}>{workout.exercises.length} exercises</Text>
+                <Feather name="align-justify" size={12} color={colors.mutedForeground} />
+                <Text style={[styles.heroMetaText, { color: colors.mutedForeground }]}>{workout.exercises.length} exercises</Text>
               </View>
             </View>
           </View>
