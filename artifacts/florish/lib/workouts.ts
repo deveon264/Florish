@@ -17,6 +17,7 @@ export type Workout = {
   caloriesBurned: number;
   description: string;
   thumbnailColor: string;
+  thumbnailImage: string;
   exercises: Exercise[];
 };
 
@@ -51,6 +52,7 @@ export const WORKOUTS: Workout[] = [
     description:
       "A complete full-body workout designed to torch calories and build lean muscle. Perfect for busy days when you want maximum results in minimum time.",
     thumbnailColor: "#E8A0B4",
+    thumbnailImage: "https://images.unsplash.com/photo-1552252396082-f0a9b1bf6b3a?w=200&h=200&fit=crop&auto=format&q=80",
     exercises: [
       {
         name: "Jumping Jacks",
@@ -97,6 +99,7 @@ export const WORKOUTS: Workout[] = [
     description:
       "High-intensity intervals designed to maximize fat burning and boost metabolism. Short but incredibly effective.",
     thumbnailColor: "#D4A574",
+    thumbnailImage: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&h=200&fit=crop&auto=format&q=80",
     exercises: [
       {
         name: "Burpees",
@@ -140,6 +143,7 @@ export const WORKOUTS: Workout[] = [
     description:
       "Targeted toning exercises that define and sculpt every muscle group. High reps, low rest for that lean, toned look.",
     thumbnailColor: "#B8D4B0",
+    thumbnailImage: "https://images.unsplash.com/photo-1518611012118-696072aa579a?w=200&h=200&fit=crop&auto=format&q=80",
     exercises: [
       {
         name: "Lateral Lunges",
@@ -181,6 +185,7 @@ export const WORKOUTS: Workout[] = [
     description:
       "A focused ab workout that targets your entire core — upper abs, lower abs, obliques, and deep stabilizers.",
     thumbnailColor: "#A8C4E0",
+    thumbnailImage: "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=200&h=200&fit=crop&auto=format&q=80",
     exercises: [
       {
         name: "Crunches",
@@ -228,6 +233,7 @@ export const WORKOUTS: Workout[] = [
     description:
       "Build beautiful upper body strength — toned arms, shoulders, chest and back. No equipment needed.",
     thumbnailColor: "#F0B4C8",
+    thumbnailImage: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=200&h=200&fit=crop&auto=format&q=80",
     exercises: [
       {
         name: "Wide Push-Ups",
@@ -268,6 +274,7 @@ export const WORKOUTS: Workout[] = [
     description:
       "Grow and shape your glutes, hamstrings, and quads with this targeted lower body routine. Your legs will thank you.",
     thumbnailColor: "#C4B0D4",
+    thumbnailImage: "https://images.unsplash.com/photo-1434682881908-b43d0467b798?w=200&h=200&fit=crop&auto=format&q=80",
     exercises: [
       {
         name: "Romanian Deadlifts",
@@ -309,6 +316,7 @@ export const WORKOUTS: Workout[] = [
     description:
       "The perfect starting point for your fitness journey. Build confidence and establish movement patterns with this gentle but effective routine.",
     thumbnailColor: "#B4D4C4",
+    thumbnailImage: "https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=200&h=200&fit=crop&auto=format&q=80",
     exercises: [
       {
         name: "Marching in Place",
@@ -349,6 +357,7 @@ export const WORKOUTS: Workout[] = [
     description:
       "Elite-level training for those ready to push their limits. Brutal circuits designed for maximum results. Not for the faint-hearted.",
     thumbnailColor: "#E0A0A0",
+    thumbnailImage: "https://images.unsplash.com/photo-1526506118085-60ce8714f8c5?w=200&h=200&fit=crop&auto=format&q=80",
     exercises: [
       {
         name: "Plyometric Push-Ups",
