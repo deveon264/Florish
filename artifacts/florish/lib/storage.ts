@@ -116,6 +116,17 @@ export async function clearSession(): Promise<void> {
   await setSessionActive(false);
 }
 
+export type WeightUnit = "kg" | "lbs";
+
+export async function getWeightUnit(): Promise<WeightUnit> {
+  const val = await AsyncStorage.getItem("florish_weight_unit");
+  return val === "lbs" ? "lbs" : "kg";
+}
+
+export async function setWeightUnit(unit: WeightUnit): Promise<void> {
+  await AsyncStorage.setItem("florish_weight_unit", unit);
+}
+
 export async function getRememberMe(): Promise<boolean> {
   const val = await AsyncStorage.getItem(KEYS.REMEMBER_ME);
   return val === "true";

@@ -19,9 +19,10 @@ import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/context/AuthContext";
 import { useFitness } from "@/context/FitnessContext";
+import { useWeightUnit } from "@/hooks/useWeightUnit";
 import type { WeightEntry } from "@/lib/storage";
 
-function WeightChart({ entries, colors }: { entries: WeightEntry[]; colors: any }) {
+function WeightChart({ entries, colors, toDisplay }: { entries: WeightEntry[]; colors: any; toDisplay: (kg: number) => number }) {
   if (entries.length < 2) {
     return (
       <View style={[chartStyles.empty, { backgroundColor: colors.muted, borderRadius: 12 }]}>
@@ -33,7 +34,7 @@ function WeightChart({ entries, colors }: { entries: WeightEntry[]; colors: any 
   }
 
   const sorted = [...entries].sort((a, b) => a.date.localeCompare(b.date));
-  const values = sorted.map((e) => e.weightKg);
+  const values = sorted.map((e) => toDisplay(e.weightKg));
   const min = Math.min(...values) - 1;
   const max = Math.max(...values) + 1;
   const range = max - min;
@@ -42,8 +43,8 @@ function WeightChart({ entries, colors }: { entries: WeightEntry[]; colors: any 
 
   const points = sorted.map((e, i) => ({
     x: (i / (sorted.length - 1)) * w,
-    y: h - ((e.weightKg - min) / range) * h,
-    weight: e.weightKg,
+    y: h - ((toDisplay(e.weightKg) - min) / range) * h,
+    weight: toDisplay(e.weightKg),
     date: e.date,
   }));
 
@@ -79,16 +80,19 @@ export default function ProgressScreen() {
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const botPad = Platform.OS === "web" ? 34 : insets.bottom;
 
+  const { unit, toDisplay, toKg } = useWeightUnit();
+
   const [weightModal, setWeightModal] = useState(false);
   const [newWeight, setNewWeight] = useState("");
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
 
-  const latestWeight = weightLog.length > 0
+  const latestWeightKg = weightLog.length > 0
     ? weightLog.sort((a, b) => b.date.localeCompare(a.date))[0]?.weightKg
     : user?.weightKg ?? 0;
+  const latestWeight = latestWeightKg != null ? toDisplay(latestWeightKg) : null;
 
   const bmi = user?.heightCm
-    ? latestWeight! / Math.pow(user.heightCm / 100, 2)
+    ? latestWeightKg! / Math.pow(user.heightCm / 100, 2)
     : null;
 
   const bmiCategory = bmi
@@ -102,7 +106,7 @@ export default function ProgressScreen() {
   const handleLogWeight = async () => {
     const w = parseFloat(newWeight);
     if (!w || w <= 0) return;
-    await logWeight(w);
+    await logWeight(toKg(w));
     setNewWeight("");
     setWeightModal(false);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -167,10 +171,10 @@ export default function ProgressScreen() {
             <Text style={[styles.weightNum, { color: colors.foreground }]}>
               {latestWeight?.toFixed(1) ?? "—"}
             </Text>
-            <Text style={[styles.weightUnit, { color: colors.mutedForeground }]}>kg</Text>
+            <Text style={[styles.weightUnit, { color: colors.mutedForeground }]}>{unit}</Text>
           </View>
 
-          <WeightChart entries={weightLog} colors={colors} />
+          <WeightChart entries={weightLog} colors={colors} toDisplay={toDisplay} />
         </View>
 
         {bmi && (
@@ -255,7 +259,7 @@ export default function ProgressScreen() {
                 keyboardType="decimal-pad"
                 autoFocus
               />
-              <Text style={[styles.weightUnit2, { color: colors.foreground }]}>kg</Text>
+              <Text style={[styles.weightUnit2, { color: colors.foreground }]}>{unit}</Text>
             </View>
             <View style={styles.modalBtns}>
               <TouchableOpacity

@@ -17,6 +17,7 @@ import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/context/AuthContext";
 import { useFitness } from "@/context/FitnessContext";
 import { useSubscription } from "@/lib/revenuecat";
+import { useWeightUnit } from "@/hooks/useWeightUnit";
 
 const GOAL_LABELS: Record<string, string> = {
   lose_weight: "Lose Weight",
@@ -33,6 +34,8 @@ export default function ProfileScreen() {
   const { isSubscribed, customerInfo } = useSubscription();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const botPad = Platform.OS === "web" ? 34 : insets.bottom;
+
+  const { unit, changeUnit, toDisplay } = useWeightUnit();
 
   const [logoutModal, setLogoutModal] = useState(false);
   const [activeModal, setActiveModal] = useState<"privacy" | "help" | "about" | null>(null);
@@ -102,7 +105,7 @@ export default function ProfileScreen() {
           <Text style={[styles.cardTitle, { color: colors.foreground }]}>Body Stats</Text>
           {[
             { label: "Age", value: user?.age ? `${user.age} years` : "—" },
-            { label: "Weight", value: user?.weightKg ? `${user.weightKg} kg` : "—" },
+            { label: "Weight", value: user?.weightKg ? `${toDisplay(user.weightKg)} ${unit}` : "—" },
             { label: "Height", value: user?.heightCm ? `${user.heightCm} cm` : "—" },
             { label: "Daily Calorie Goal", value: user?.dailyCalorieGoal ? `${user.dailyCalorieGoal} kcal` : "—" },
             { label: "Daily Water Goal", value: user?.dailyWaterGoalMl ? `${(user.dailyWaterGoalMl / 1000).toFixed(1)} L` : "—" },
@@ -140,6 +143,26 @@ export default function ProfileScreen() {
 
         <View style={[styles.infoCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <Text style={[styles.cardTitle, { color: colors.foreground }]}>Settings</Text>
+
+          <View style={[styles.settingRow, { borderBottomWidth: 1, borderBottomColor: colors.border }]}>
+            <View style={[styles.settingIcon, { backgroundColor: colors.muted }]}>
+              <Feather name="activity" size={16} color={colors.foreground} />
+            </View>
+            <Text style={[styles.settingLabel, { color: colors.foreground }]}>Weight Unit</Text>
+            <View style={[styles.unitToggle, { backgroundColor: colors.muted }]}>
+              {(["kg", "lbs"] as const).map((u) => (
+                <TouchableOpacity
+                  key={u}
+                  style={[styles.unitOption, unit === u && { backgroundColor: colors.primary }]}
+                  onPress={() => changeUnit(u)}
+                  activeOpacity={0.8}
+                >
+                  <Text style={[styles.unitOptionText, { color: unit === u ? "#fff" : colors.mutedForeground }]}>{u}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
           {[
             { icon: "bell", label: "Notifications", action: handleNotifications },
             { icon: "lock", label: "Privacy", action: () => setActiveModal("privacy") },
@@ -148,7 +171,7 @@ export default function ProfileScreen() {
           ].map((item, i) => (
             <TouchableOpacity
               key={item.label}
-              style={[styles.settingRow, i > 0 && { borderTopWidth: 1, borderTopColor: colors.border }]}
+              style={[styles.settingRow, { borderTopWidth: 1, borderTopColor: colors.border }]}
               onPress={item.action}
               activeOpacity={0.7}
             >
@@ -343,6 +366,9 @@ const styles = StyleSheet.create({
   settingRow: { flexDirection: "row", alignItems: "center", paddingVertical: 14, gap: 14 },
   settingIcon: { width: 34, height: 34, borderRadius: 10, justifyContent: "center", alignItems: "center" },
   settingLabel: { flex: 1, fontSize: 15 },
+  unitToggle: { flexDirection: "row", borderRadius: 8, padding: 2, gap: 2 },
+  unitOption: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: 6 },
+  unitOptionText: { fontSize: 13, fontWeight: "600" as const },
   dillishCard: { borderRadius: 16, borderWidth: 1, padding: 16, gap: 8 },
   dillishTitle: { fontSize: 15, fontWeight: "800" as const },
   dillishText: { fontSize: 14, lineHeight: 20 },
