@@ -66,6 +66,7 @@ export default function WorkoutDetailScreen() {
   const [isActive, setIsActive] = useState(false);
   const [currentExercise, setCurrentExercise] = useState(0);
   const [timeLeft, setTimeLeft] = useState(0);
+  const [totalDuration, setTotalDuration] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [exerciseVideos, setExerciseVideos] = useState<Record<string, ExerciseVideo>>({});
@@ -82,7 +83,9 @@ export default function WorkoutDetailScreen() {
   useEffect(() => {
     if (workout && workout.exercises[currentExercise]) {
       const ex = workout.exercises[currentExercise]!;
-      setTimeLeft(ex.durationSeconds ?? ex.restSeconds * 2);
+      const dur = ex.durationSeconds ?? ex.restSeconds * 2;
+      setTimeLeft(dur);
+      setTotalDuration(dur);
     }
     return () => clearInterval(intervalRef.current ?? undefined);
   }, [currentExercise, workout]);
@@ -234,10 +237,32 @@ export default function WorkoutDetailScreen() {
           <View style={styles.videoHero}>
             <ExerciseVideoPlayer uri={currentVideo.uri} />
             <View style={styles.videoHeroOverlay}>
-              <Text style={styles.videoExerciseNumber}>
-                {currentExercise + 1} / {workout.exercises.length}
-              </Text>
-              <Text style={styles.videoExerciseName}>{ex?.name ?? "Rest"}</Text>
+              <View style={styles.videoOverlayRow}>
+                <View>
+                  <Text style={styles.videoExerciseNumber}>
+                    {currentExercise + 1} / {workout.exercises.length}
+                  </Text>
+                  <Text style={styles.videoExerciseName}>{ex?.name ?? "Rest"}</Text>
+                </View>
+                {isActive && totalDuration > 0 && (
+                  <View style={[styles.videoTimerBadge, { backgroundColor: colors.primary }]}>
+                    <Text style={styles.videoTimerText}>{timeLeft}s</Text>
+                  </View>
+                )}
+              </View>
+              {isActive && totalDuration > 0 && (
+                <View style={styles.videoProgressBar}>
+                  <View
+                    style={[
+                      styles.videoProgressFill,
+                      {
+                        backgroundColor: colors.primary,
+                        width: `${Math.max(0, (timeLeft / totalDuration) * 100)}%` as any,
+                      },
+                    ]}
+                  />
+                </View>
+              )}
             </View>
             {isAdmin && (
               <TouchableOpacity
@@ -254,7 +279,7 @@ export default function WorkoutDetailScreen() {
               {currentExercise + 1} / {workout.exercises.length}
             </Text>
             <Text style={[styles.exerciseName, { color: colors.foreground }]}>{ex?.name ?? "Rest"}</Text>
-            {isActive && ex?.durationSeconds && (
+            {isActive && totalDuration > 0 && (
               <View style={[styles.timerCircle, { borderColor: colors.primary }]}>
                 <Text style={[styles.timerText, { color: colors.primary }]}>{timeLeft}s</Text>
               </View>
@@ -271,6 +296,26 @@ export default function WorkoutDetailScreen() {
                 </Text>
               </TouchableOpacity>
             )}
+          </View>
+        )}
+
+        {/* Exercise timer progress bar (shown below hero when active) */}
+        {isActive && totalDuration > 0 && (
+          <View style={[styles.timerBarWrap, { backgroundColor: colors.card, borderBottomColor: colors.border }]}>
+            <View style={[styles.timerBarTrack, { backgroundColor: colors.muted }]}>
+              <View
+                style={[
+                  styles.timerBarFill,
+                  {
+                    backgroundColor: colors.primary,
+                    width: `${Math.max(0, (timeLeft / totalDuration) * 100)}%` as any,
+                  },
+                ]}
+              />
+            </View>
+            <Text style={[styles.timerBarLabel, { color: colors.mutedForeground }]}>
+              {timeLeft}s remaining
+            </Text>
           </View>
         )}
 
@@ -422,10 +467,28 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     padding: 12,
-    backgroundColor: "rgba(0,0,0,0.45)",
+    paddingBottom: 10,
+    backgroundColor: "rgba(0,0,0,0.55)",
+    gap: 8,
   },
+  videoOverlayRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   videoExerciseNumber: { fontSize: 11, color: "rgba(255,255,255,0.7)", fontWeight: "600" as const },
   videoExerciseName: { fontSize: 18, color: "#fff", fontWeight: "800" as const },
+  videoTimerBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    minWidth: 52,
+    alignItems: "center",
+  },
+  videoTimerText: { fontSize: 16, fontWeight: "800" as const, color: "#fff" },
+  videoProgressBar: {
+    height: 4,
+    backgroundColor: "rgba(255,255,255,0.25)",
+    borderRadius: 2,
+    overflow: "hidden",
+  },
+  videoProgressFill: { height: 4, borderRadius: 2 },
   videoDeleteBtn: {
     position: "absolute",
     top: 10,
@@ -434,6 +497,16 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 6,
   },
+  timerBarWrap: {
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 8,
+    gap: 6,
+    borderBottomWidth: 1,
+  },
+  timerBarTrack: { height: 6, borderRadius: 3, overflow: "hidden" },
+  timerBarFill: { height: 6, borderRadius: 3 },
+  timerBarLabel: { fontSize: 12, fontWeight: "600" as const, textAlign: "right" as const },
 
   // Color hero (no video)
   colorHero: {
