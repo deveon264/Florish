@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+import * as SecureStore from "expo-secure-store";
 import {
   UserProfile,
   getUserProfile,
@@ -8,9 +9,9 @@ import {
   isPaywallPassed,
   setPaywallPassed,
 } from "@/lib/storage";
-import { useReplitAuth } from "@/lib/replit-auth";
 
 const ADMIN_EMAIL = "6ixbelowna@gmail.com";
+const AUTH_TOKEN_KEY = "auth_session_token";
 
 const DEV_ADMIN_PROFILE: UserProfile = {
   name: "Ndili",
@@ -24,8 +25,24 @@ const DEV_ADMIN_PROFILE: UserProfile = {
   createdAt: new Date().toISOString(),
 };
 
+function getApiBaseUrl(): string {
+  if (process.env.EXPO_PUBLIC_DOMAIN) {
+    return `https://${process.env.EXPO_PUBLIC_DOMAIN}`;
+  }
+  return "";
+}
+
+interface AuthUser {
+  id: string;
+  email: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  profileImageUrl: string | null;
+}
+
 type AuthState = {
   user: UserProfile | null;
+  authUser: AuthUser | null;
   onboardingComplete: boolean;
   paywallPassed: boolean;
   isLoading: boolean;
@@ -35,7 +52,8 @@ type AuthState = {
   updateUser: (profile: UserProfile) => Promise<void>;
   completeOnboarding: () => Promise<void>;
   completePaywall: () => Promise<void>;
-  login: () => Promise<void>;
+  login: (email: string, password: string) => Promise<{ error?: string }>;
+  register: (email: string, password: string, firstName?: string) => Promise<{ error?: string }>;
   logout: () => Promise<void>;
   reload: () => Promise<void>;
 };
@@ -43,7 +61,8 @@ type AuthState = {
 const AuthContext = createContext<AuthState | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const { user: replitUser, isLoading: authLoading, login, logout: replitLogout } = useReplitAuth();
+  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
 
   const [user, setUser] = useState<UserProfile | null>(null);
   const [onboardingComplete, setOnboardingState] = useState(false);
@@ -51,12 +70,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [hasProfile, setHasProfile] = useState(false);
   const [profileLoading, setProfileLoading] = useState(true);
 
-  const isAdmin = replitUser?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+  const isAdmin = authUser?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
 
-  const load = async () => {
+  const fetchAuthUser = useCallback(async () => {
+    try {
+      const token = await SecureStore.getItemAsync(AUTH_TOKEN_KEY);
+      if (!token) {
+        setAuthUser(null);
+        return;
+      }
+      const apiBase = getApiBaseUrl();
+      const res = await fetch(`${apiBase}/api/auth/user`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (data.user) {
+        setAuthUser(data.user);
+      } else {
+        await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
+        setAuthUser(null);
+      }
+    } catch {
+      setAuthUser(null);
+    } finally {
+      setIsAuthLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchAuthUser();
+  }, [fetchAuthUser]);
+
+  const load = useCallback(async () => {
     setProfileLoading(true);
     try {
-      if (!replitUser) {
+      if (!authUser) {
         setUser(null);
         setOnboardingState(false);
         setPaywallState(false);
@@ -86,13 +134,71 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setProfileLoading(false);
     }
-  };
+  }, [authUser, isAdmin]);
 
   useEffect(() => {
-    if (!authLoading) {
+    if (!isAuthLoading) {
       load();
     }
-  }, [replitUser, authLoading]);
+  }, [authUser, isAuthLoading, load]);
+
+  const login = useCallback(async (email: string, password: string): Promise<{ error?: string }> => {
+    try {
+      const apiBase = getApiBaseUrl();
+      const res = await fetch(`${apiBase}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        return { error: data.error || "Login failed" };
+      }
+      await SecureStore.setItemAsync(AUTH_TOKEN_KEY, data.token);
+      setAuthUser(data.user);
+      return {};
+    } catch {
+      return { error: "Network error. Please try again." };
+    }
+  }, []);
+
+  const register = useCallback(async (email: string, password: string, firstName?: string): Promise<{ error?: string }> => {
+    try {
+      const apiBase = getApiBaseUrl();
+      const res = await fetch(`${apiBase}/api/auth/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, firstName }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        return { error: data.error || "Registration failed" };
+      }
+      await SecureStore.setItemAsync(AUTH_TOKEN_KEY, data.token);
+      setAuthUser(data.user);
+      return {};
+    } catch {
+      return { error: "Network error. Please try again." };
+    }
+  }, []);
+
+  const logout = useCallback(async () => {
+    try {
+      const token = await SecureStore.getItemAsync(AUTH_TOKEN_KEY);
+      if (token) {
+        const apiBase = getApiBaseUrl();
+        await fetch(`${apiBase}/api/auth/logout`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
+    } catch {}
+    await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
+    setAuthUser(null);
+    setUser(null);
+    setOnboardingState(false);
+    setPaywallState(false);
+  }, []);
 
   const updateUser = async (profile: UserProfile) => {
     await saveUserProfile(profile);
@@ -110,20 +216,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setPaywallState(true);
   };
 
-  const logout = async () => {
-    setUser(null);
-    setOnboardingState(false);
-    setPaywallState(false);
-    await replitLogout();
-  };
-
-  const isAuthenticated = !!replitUser;
-  const isLoading = authLoading || profileLoading;
+  const isAuthenticated = !!authUser;
+  const isLoading = isAuthLoading || profileLoading;
 
   return (
     <AuthContext.Provider
       value={{
         user,
+        authUser,
         onboardingComplete,
         paywallPassed,
         isLoading,
@@ -134,6 +234,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         completeOnboarding,
         completePaywall,
         login,
+        register,
         logout,
         reload: load,
       }}
