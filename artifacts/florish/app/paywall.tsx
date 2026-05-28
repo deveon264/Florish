@@ -99,7 +99,7 @@ export default function PaywallScreen() {
   const getPrice = (key: PlanKey): string => {
     const pkg = getPlan(key);
     if (pkg) return pkg.product.priceString;
-    const fallback: Record<PlanKey, string> = { weekly: "$6.99", monthly: "$19.99", yearly: "$99.99" };
+    const fallback: Record<PlanKey, string> = { weekly: "$2.99", monthly: "$4.99", yearly: "$49.99" };
     return fallback[key];
   };
 
