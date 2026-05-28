@@ -79,12 +79,16 @@ export default function WorkoutDetailScreen() {
   const [currentExercise, setCurrentExercise] = useState(0);
   const [timeLeft, setTimeLeft] = useState(0);
   const [totalDuration, setTotalDuration] = useState(0);
+  const [isResting, setIsResting] = useState(false);
+  const [restTimeLeft, setRestTimeLeft] = useState(0);
+  const [restTotal, setRestTotal] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [exerciseVideos, setExerciseVideos] = useState<Record<string, ExerciseVideo>>({});
   const [uploadingFor, setUploadingFor] = useState<string | null>(null);
   const [showVideoFor, setShowVideoFor] = useState<string | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const restIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const isFav = favoriteWorkouts.includes(id ?? "");
 
@@ -117,14 +121,54 @@ export default function WorkoutDetailScreen() {
     return () => clearInterval(intervalRef.current ?? undefined);
   }, [isActive, currentExercise]);
 
+  // Rest period countdown
+  useEffect(() => {
+    if (!isResting) {
+      clearInterval(restIntervalRef.current ?? undefined);
+      return;
+    }
+    restIntervalRef.current = setInterval(() => {
+      setRestTimeLeft((t) => {
+        if (t <= 1) {
+          clearInterval(restIntervalRef.current ?? undefined);
+          setIsResting(false);
+          setCurrentExercise((c) => c + 1);
+          return 0;
+        }
+        return t - 1;
+      });
+      setElapsed((e) => e + 1);
+    }, 1000);
+    return () => clearInterval(restIntervalRef.current ?? undefined);
+  }, [isResting]);
+
+  const startRest = (restSeconds: number) => {
+    clearInterval(intervalRef.current ?? undefined);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    setRestTimeLeft(restSeconds);
+    setRestTotal(restSeconds);
+    setIsResting(true);
+  };
+
   const handleNextExercise = () => {
     if (!workout) return;
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    if (currentExercise < workout.exercises.length - 1) {
-      setCurrentExercise((c) => c + 1);
-    } else {
+    const ex = workout.exercises[currentExercise];
+    const isLast = currentExercise >= workout.exercises.length - 1;
+    if (isLast) {
       handleComplete();
+    } else if (isActive && ex && ex.restSeconds > 0) {
+      startRest(ex.restSeconds);
+    } else {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      setCurrentExercise((c) => c + 1);
     }
+  };
+
+  const skipRest = () => {
+    clearInterval(restIntervalRef.current ?? undefined);
+    setIsResting(false);
+    setCurrentExercise((c) => c + 1);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
 
   const handleComplete = async () => {
@@ -450,6 +494,57 @@ export default function WorkoutDetailScreen() {
           </View>
         )}
       </View>
+
+      {/* Rest period overlay */}
+      {isResting && (
+        <View style={[styles.restOverlay, { backgroundColor: colors.background }]}>
+          <View style={styles.restInner}>
+            <Text style={[styles.restLabel, { color: colors.mutedForeground }]}>TAKE A BREATHER</Text>
+
+            <View style={[styles.restRing, { borderColor: colors.primary + "30" }]}>
+              <View style={[styles.restRingFill, { borderColor: colors.primary }]}>
+                <Text style={[styles.restCountdown, { color: colors.primary }]}>{restTimeLeft}</Text>
+                <Text style={[styles.restSec, { color: colors.mutedForeground }]}>seconds</Text>
+              </View>
+            </View>
+
+            <View style={[styles.restProgressTrack, { backgroundColor: colors.muted }]}>
+              <View
+                style={[
+                  styles.restProgressFill,
+                  {
+                    backgroundColor: colors.primary,
+                    width: `${Math.max(0, (restTimeLeft / restTotal) * 100)}%` as any,
+                  },
+                ]}
+              />
+            </View>
+
+            {workout.exercises[currentExercise + 1] && (
+              <View style={[styles.nextUpCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                <Text style={[styles.nextUpLabel, { color: colors.mutedForeground }]}>UP NEXT</Text>
+                <Text style={[styles.nextUpName, { color: colors.foreground }]}>
+                  {workout.exercises[currentExercise + 1]!.name}
+                </Text>
+                <Text style={[styles.nextUpMeta, { color: colors.mutedForeground }]}>
+                  {workout.exercises[currentExercise + 1]!.durationSeconds
+                    ? `${workout.exercises[currentExercise + 1]!.durationSeconds}s`
+                    : `${workout.exercises[currentExercise + 1]!.sets} × ${workout.exercises[currentExercise + 1]!.reps} reps`}
+                </Text>
+              </View>
+            )}
+
+            <TouchableOpacity
+              style={[styles.skipRestBtn, { backgroundColor: colors.muted }]}
+              onPress={skipRest}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.skipRestText, { color: colors.foreground }]}>Skip Rest</Text>
+              <Feather name="skip-forward" size={16} color={colors.foreground} />
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
     </View>
   );
 }
@@ -604,4 +699,37 @@ const styles = StyleSheet.create({
   statLabel: { fontSize: 12 },
   doneBtn: { width: "100%", paddingVertical: 18, borderRadius: 16, alignItems: "center", marginTop: 20 },
   doneBtnText: { fontSize: 17, fontWeight: "700" as const },
+
+  // Rest overlay
+  restOverlay: {
+    position: "absolute" as const,
+    top: 0, left: 0, right: 0, bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  restInner: { width: "100%", paddingHorizontal: 32, alignItems: "center", gap: 24 },
+  restLabel: { fontSize: 13, fontWeight: "700" as const, letterSpacing: 1.5, textTransform: "uppercase" as const },
+  restRing: {
+    width: 160, height: 160, borderRadius: 80, borderWidth: 10,
+    justifyContent: "center", alignItems: "center",
+  },
+  restRingFill: {
+    width: 136, height: 136, borderRadius: 68, borderWidth: 4,
+    justifyContent: "center", alignItems: "center", gap: 2,
+  },
+  restCountdown: { fontSize: 56, fontWeight: "900" as const, lineHeight: 60 },
+  restSec: { fontSize: 13, fontWeight: "600" as const },
+  restProgressTrack: { width: "100%", height: 6, borderRadius: 3, overflow: "hidden" as const },
+  restProgressFill: { height: 6, borderRadius: 3 },
+  nextUpCard: {
+    width: "100%", padding: 16, borderRadius: 16, borderWidth: 1, gap: 4,
+  },
+  nextUpLabel: { fontSize: 11, fontWeight: "700" as const, letterSpacing: 1, textTransform: "uppercase" as const },
+  nextUpName: { fontSize: 20, fontWeight: "800" as const },
+  nextUpMeta: { fontSize: 13 },
+  skipRestBtn: {
+    flexDirection: "row" as const, alignItems: "center", gap: 8,
+    paddingHorizontal: 24, paddingVertical: 14, borderRadius: 14,
+  },
+  skipRestText: { fontSize: 15, fontWeight: "600" as const },
 });
