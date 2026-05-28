@@ -98,7 +98,7 @@ export const WORKOUTS: Workout[] = [
     caloriesBurned: 300,
     description:
       "High-intensity intervals designed to maximize fat burning and boost metabolism. Short but incredibly effective.",
-    thumbnailColor: "#D4A574",
+    thumbnailColor: "#3BBDB5",
     thumbnailImage: require("../assets/images/workout_hiit.png"),
     exercises: [
       {
@@ -273,7 +273,7 @@ export const WORKOUTS: Workout[] = [
     caloriesBurned: 240,
     description:
       "Grow and shape your glutes, hamstrings, and quads with this targeted lower body routine. Your legs will thank you.",
-    thumbnailColor: "#C4B0D4",
+    thumbnailColor: "#4ECDC4",
     thumbnailImage: require("../assets/images/workout_lower_body.png"),
     exercises: [
       {
