@@ -572,7 +572,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 12,
     gap: 12,
-    backgroundColor: "rgba(0,0,0,0.35)",
+    backgroundColor: "transparent",
     zIndex: 10,
   },
   progressBarOuter: { flex: 1, height: 4, backgroundColor: "#eee", borderRadius: 2, overflow: "hidden" },
