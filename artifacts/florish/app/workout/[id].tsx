@@ -390,13 +390,13 @@ export default function WorkoutDetailScreen() {
                   styles.timerBarFill,
                   {
                     backgroundColor: colors.primary,
-                    width: `${Math.max(0, (timeLeft / totalDuration) * 100)}%` as any,
+                    width: `${Math.max(0, ((totalDuration - timeLeft) / totalDuration) * 100)}%` as any,
                   },
                 ]}
               />
             </View>
             <Text style={[styles.timerBarLabel, { color: colors.mutedForeground }]}>
-              {timeLeft}s remaining
+              remaining
             </Text>
           </View>
         )}
