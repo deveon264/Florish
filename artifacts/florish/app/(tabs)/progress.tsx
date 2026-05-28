@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import {
   Alert,
+  KeyboardAvoidingView,
   Modal,
   Platform,
   ScrollView,
@@ -237,6 +238,10 @@ export default function ProgressScreen() {
       </ScrollView>
 
       <Modal visible={weightModal} transparent animationType="slide" presentationStyle="pageSheet">
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+        >
         <View style={[styles.modalBg, { backgroundColor: colors.background }]}>
           <View style={[styles.modalInner, { paddingBottom: insets.bottom + 24 }]}>
             <Text style={[styles.modalTitle, { color: colors.foreground }]}>Log Weight</Text>
@@ -268,6 +273,7 @@ export default function ProgressScreen() {
             </View>
           </View>
         </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       <Modal visible={!!selectedPhoto} transparent animationType="fade">
