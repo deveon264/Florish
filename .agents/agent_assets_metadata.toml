@@ -66,3 +66,51 @@ id = "jGh55D9yoXL9NcGhRdgm3"
 uri = "file://artifacts/florish/assets/images/workout_advanced.png"
 type = "image"
 title = "black woman advanced workout"
+
+[[generated]]
+id = "Y-u-ouBw_YGSYN3WGpHKT"
+uri = "file://artifacts/florish/assets/images/bg_full_body.png"
+type = "image"
+title = "full body workout bg"
+
+[[generated]]
+id = "I5tpXJbr_QbzD1sdoGiDk"
+uri = "file://artifacts/florish/assets/images/bg_hiit.png"
+type = "image"
+title = "hiit workout bg"
+
+[[generated]]
+id = "MtdFWr7_jMioAO5cH6gBk"
+uri = "file://artifacts/florish/assets/images/bg_toning.png"
+type = "image"
+title = "toning workout bg"
+
+[[generated]]
+id = "6ZUa9Dk3f1ScNTBr3X0i4"
+uri = "file://artifacts/florish/assets/images/bg_abs.png"
+type = "image"
+title = "abs workout bg"
+
+[[generated]]
+id = "Do2p5v5Ro8wMIsbum-hCV"
+uri = "file://artifacts/florish/assets/images/bg_upper_body.png"
+type = "image"
+title = "upper body workout bg"
+
+[[generated]]
+id = "2BhLcptNdipUtx77qs3Uz"
+uri = "file://artifacts/florish/assets/images/bg_lower_body.png"
+type = "image"
+title = "lower body workout bg"
+
+[[generated]]
+id = "vvNrpGTO7pH9giI91J6Tf"
+uri = "file://artifacts/florish/assets/images/bg_beginner.png"
+type = "image"
+title = "beginner workout bg"
+
+[[generated]]
+id = "mWCsMbFXMlVjWRMedOkhP"
+uri = "file://artifacts/florish/assets/images/bg_advanced.png"
+type = "image"
+title = "advanced workout bg"

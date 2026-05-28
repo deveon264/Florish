@@ -52,7 +52,7 @@ export const WORKOUTS: Workout[] = [
     description:
       "A complete full-body workout designed to torch calories and build lean muscle. Perfect for busy days when you want maximum results in minimum time.",
     thumbnailColor: "#E8A0B4",
-    thumbnailImage: require("../assets/images/workout_full_body.png"),
+    thumbnailImage: require("../assets/images/bg_full_body.png"),
     exercises: [
       {
         name: "Jumping Jacks",
@@ -99,7 +99,7 @@ export const WORKOUTS: Workout[] = [
     description:
       "High-intensity intervals designed to maximize fat burning and boost metabolism. Short but incredibly effective.",
     thumbnailColor: "#D4A574",
-    thumbnailImage: require("../assets/images/workout_hiit.png"),
+    thumbnailImage: require("../assets/images/bg_hiit.png"),
     exercises: [
       {
         name: "Burpees",
@@ -143,7 +143,7 @@ export const WORKOUTS: Workout[] = [
     description:
       "Targeted toning exercises that define and sculpt every muscle group. High reps, low rest for that lean, toned look.",
     thumbnailColor: "#B8D4B0",
-    thumbnailImage: require("../assets/images/workout_toning.png"),
+    thumbnailImage: require("../assets/images/bg_toning.png"),
     exercises: [
       {
         name: "Lateral Lunges",
@@ -185,7 +185,7 @@ export const WORKOUTS: Workout[] = [
     description:
       "A focused ab workout that targets your entire core — upper abs, lower abs, obliques, and deep stabilizers.",
     thumbnailColor: "#A8C4E0",
-    thumbnailImage: require("../assets/images/workout_abs.png"),
+    thumbnailImage: require("../assets/images/bg_abs.png"),
     exercises: [
       {
         name: "Crunches",
@@ -233,7 +233,7 @@ export const WORKOUTS: Workout[] = [
     description:
       "Build beautiful upper body strength — toned arms, shoulders, chest and back. No equipment needed.",
     thumbnailColor: "#F0B4C8",
-    thumbnailImage: require("../assets/images/workout_upper_body.png"),
+    thumbnailImage: require("../assets/images/bg_upper_body.png"),
     exercises: [
       {
         name: "Wide Push-Ups",
@@ -274,7 +274,7 @@ export const WORKOUTS: Workout[] = [
     description:
       "Grow and shape your glutes, hamstrings, and quads with this targeted lower body routine. Your legs will thank you.",
     thumbnailColor: "#C4B0D4",
-    thumbnailImage: require("../assets/images/workout_lower_body.png"),
+    thumbnailImage: require("../assets/images/bg_lower_body.png"),
     exercises: [
       {
         name: "Romanian Deadlifts",
@@ -316,7 +316,7 @@ export const WORKOUTS: Workout[] = [
     description:
       "The perfect starting point for your fitness journey. Build confidence and establish movement patterns with this gentle but effective routine.",
     thumbnailColor: "#B4D4C4",
-    thumbnailImage: require("../assets/images/workout_beginner.png"),
+    thumbnailImage: require("../assets/images/bg_beginner.png"),
     exercises: [
       {
         name: "Marching in Place",
@@ -357,7 +357,7 @@ export const WORKOUTS: Workout[] = [
     description:
       "Elite-level training for those ready to push their limits. Brutal circuits designed for maximum results. Not for the faint-hearted.",
     thumbnailColor: "#E0A0A0",
-    thumbnailImage: require("../assets/images/workout_advanced.png"),
+    thumbnailImage: require("../assets/images/bg_advanced.png"),
     exercises: [
       {
         name: "Plyometric Push-Ups",
