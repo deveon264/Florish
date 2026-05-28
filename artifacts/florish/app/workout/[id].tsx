@@ -292,34 +292,6 @@ export default function WorkoutDetailScreen() {
                 <Feather name="heart" size={22} color={isFav ? colors.primary : "rgba(255,255,255,0.85)"} />
               </TouchableOpacity>
             </View>
-            <View style={styles.videoHeroOverlay}>
-              <View style={styles.videoOverlayRow}>
-                <View>
-                  <Text style={styles.videoExerciseNumber}>
-                    {currentExercise + 1} / {workout.exercises.length}
-                  </Text>
-                  <Text style={styles.videoExerciseName}>{ex?.name ?? "Rest"}</Text>
-                </View>
-                {isActive && totalDuration > 0 && (
-                  <View style={[styles.videoTimerBadge, { backgroundColor: colors.primary }]}>
-                    <Text style={styles.videoTimerText}>{timeLeft}s</Text>
-                  </View>
-                )}
-              </View>
-              {isActive && totalDuration > 0 && (
-                <View style={styles.videoProgressBar}>
-                  <View
-                    style={[
-                      styles.videoProgressFill,
-                      {
-                        backgroundColor: colors.primary,
-                        width: `${Math.max(0, (timeLeft / totalDuration) * 100)}%` as any,
-                      },
-                    ]}
-                  />
-                </View>
-              )}
-            </View>
             {isAdmin && (
               <TouchableOpacity
                 style={styles.videoDeleteBtn}
@@ -343,15 +315,6 @@ export default function WorkoutDetailScreen() {
                 <Feather name="heart" size={22} color={isFav ? colors.primary : colors.mutedForeground} />
               </TouchableOpacity>
             </View>
-            <Text style={[styles.exerciseNumber, { color: colors.mutedForeground }]}>
-              {currentExercise + 1} / {workout.exercises.length}
-            </Text>
-            <Text style={[styles.exerciseName, { color: colors.foreground }]}>{ex?.name ?? "Rest"}</Text>
-            {isActive && totalDuration > 0 && (
-              <View style={[styles.timerCircle, { borderColor: colors.primary }]}>
-                <Text style={[styles.timerText, { color: colors.primary }]}>{timeLeft}s</Text>
-              </View>
-            )}
             {isAdmin && ex && (
               <TouchableOpacity
                 style={[styles.uploadVideoBtn, { backgroundColor: colors.primary }]}
@@ -366,6 +329,21 @@ export default function WorkoutDetailScreen() {
             )}
           </View>
         )}
+
+        {/* Exercise name row — always shown below hero */}
+        <View style={[styles.exerciseInfoRow, { backgroundColor: colors.card, borderBottomColor: colors.border }]}>
+          <View>
+            <Text style={[styles.exerciseInfoNumber, { color: colors.mutedForeground }]}>
+              {currentExercise + 1} / {workout.exercises.length}
+            </Text>
+            <Text style={[styles.exerciseInfoName, { color: colors.foreground }]}>{ex?.name ?? "Rest"}</Text>
+          </View>
+          {isActive && totalDuration > 0 && (
+            <View style={[styles.videoTimerBadge, { backgroundColor: colors.primary }]}>
+              <Text style={styles.videoTimerText}>{timeLeft}s</Text>
+            </View>
+          )}
+        </View>
 
         {/* Exercise timer progress bar (shown below hero when active) */}
         {isActive && totalDuration > 0 && (
@@ -619,15 +597,24 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 6,
   },
-  timerBarWrap: {
+  exerciseInfoRow: {
+    flexDirection: "row" as const,
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 16,
-    paddingTop: 10,
-    paddingBottom: 8,
-    gap: 6,
+    paddingVertical: 12,
     borderBottomWidth: 1,
   },
-  timerBarTrack: { height: 6, borderRadius: 3, overflow: "hidden" },
-  timerBarFill: { height: 6, borderRadius: 3 },
+  exerciseInfoNumber: { fontSize: 12, fontWeight: "600" as const, marginBottom: 2 },
+  exerciseInfoName: { fontSize: 20, fontWeight: "800" as const },
+  timerBarWrap: {
+    paddingHorizontal: 16,
+    paddingTop: 6,
+    paddingBottom: 6,
+    borderBottomWidth: 1,
+  },
+  timerBarTrack: { height: 4, borderRadius: 2, overflow: "hidden" },
+  timerBarFill: { height: 4, borderRadius: 2 },
   timerBarLabel: { fontSize: 12, fontWeight: "600" as const, textAlign: "right" as const },
 
   // Color hero (no video)
