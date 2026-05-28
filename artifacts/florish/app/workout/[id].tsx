@@ -1,9 +1,11 @@
 import { router, useLocalSearchParams } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
+import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Alert,
+  Image,
   Platform,
   ScrollView,
   StyleSheet,
@@ -288,18 +290,83 @@ export default function WorkoutDetailScreen() {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView contentContainerStyle={[styles.scroll, { paddingBottom: botPad + 24 }]} showsVerticalScrollIndicator={false}>
-        {/* Controls row — always sits below the Dynamic Island / notch */}
-        <View style={[styles.heroControls, { paddingTop: topPad + 8, backgroundColor: currentVideo ? "#000" : workout.thumbnailColor + "33" }]}>
-          <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-            <Feather name="x" size={24} color={currentVideo ? "#fff" : colors.foreground} />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={handleToggleFav} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-            <Feather name="heart" size={22} color={isFav ? colors.primary : currentVideo ? "rgba(255,255,255,0.85)" : colors.mutedForeground} />
-          </TouchableOpacity>
+        {/* ── Unified hero banner ── */}
+        <View style={[styles.heroBanner, { paddingTop: topPad }]}>
+          {/* Background: workout image */}
+          <Image
+            source={workout.thumbnailImage}
+            style={styles.heroBg}
+            resizeMode="cover"
+          />
+
+          {/* Dark gradient overlay so text + buttons are always readable */}
+          <LinearGradient
+            colors={["rgba(0,0,0,0.55)", "rgba(0,0,0,0.10)", "rgba(0,0,0,0.65)"]}
+            locations={[0, 0.45, 1]}
+            style={StyleSheet.absoluteFill}
+          />
+
+          {/* Top row: back + favourite */}
+          <View style={styles.heroTopRow}>
+            <TouchableOpacity
+              style={styles.heroIconBtn}
+              onPress={() => router.back()}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <Feather name="arrow-left" size={20} color="#fff" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.heroIconBtn, isFav && { backgroundColor: colors.primary }]}
+              onPress={handleToggleFav}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <Feather name="heart" size={18} color="#fff" />
+            </TouchableOpacity>
+          </View>
+
+          {/* Bottom: workout title + meta */}
+          <View style={styles.heroBottom}>
+            <View style={styles.heroTags}>
+              <View style={[styles.heroTag, { backgroundColor: colors.primary }]}>
+                <Text style={styles.heroTagText}>{workout.category}</Text>
+              </View>
+              <View style={[styles.heroTag, { backgroundColor: "rgba(255,255,255,0.2)" }]}>
+                <Text style={styles.heroTagText}>{workout.difficulty}</Text>
+              </View>
+            </View>
+            <Text style={styles.heroTitle}>{workout.title}</Text>
+            <View style={styles.heroMeta}>
+              <View style={styles.heroMetaItem}>
+                <Feather name="clock" size={13} color="rgba(255,255,255,0.8)" />
+                <Text style={styles.heroMetaText}>{workout.durationMinutes} min</Text>
+              </View>
+              <View style={styles.heroMetaItem}>
+                <Feather name="zap" size={13} color="rgba(255,255,255,0.8)" />
+                <Text style={styles.heroMetaText}>{workout.caloriesBurned} cal</Text>
+              </View>
+              <View style={styles.heroMetaItem}>
+                <Feather name="list" size={13} color="rgba(255,255,255,0.8)" />
+                <Text style={styles.heroMetaText}>{workout.exercises.length} exercises</Text>
+              </View>
+            </View>
+          </View>
+
+          {isAdmin && ex && !currentVideo && (
+            <TouchableOpacity
+              style={[styles.uploadVideoBtn, { backgroundColor: colors.primary }]}
+              onPress={() => handleUploadVideo(ex.name)}
+              disabled={uploadingFor === ex.name}
+            >
+              <Feather name={uploadingFor === ex.name ? "loader" : "upload"} size={14} color="#fff" />
+              <Text style={styles.uploadVideoBtnText}>
+                {uploadingFor === ex.name ? "Uploading…" : "Upload Demo Video"}
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
 
-        {/* Hero: video player if available, else coloured banner — always below safe area */}
-        {currentVideo ? (
+        {/* Video player — shown below the hero when a video exists */}
+        {currentVideo && (
           <View style={styles.videoHero}>
             <ExerciseVideoPlayer uri={currentVideo.uri} shouldPlay={isActive} height={220} />
             {isAdmin && (
@@ -308,21 +375,6 @@ export default function WorkoutDetailScreen() {
                 onPress={() => handleDeleteVideo(ex!.name)}
               >
                 <Feather name="trash-2" size={14} color="#fff" />
-              </TouchableOpacity>
-            )}
-          </View>
-        ) : (
-          <View style={[styles.colorHero, { backgroundColor: workout.thumbnailColor + "33" }]}>
-            {isAdmin && ex && (
-              <TouchableOpacity
-                style={[styles.uploadVideoBtn, { backgroundColor: colors.primary }]}
-                onPress={() => handleUploadVideo(ex.name)}
-                disabled={uploadingFor === ex.name}
-              >
-                <Feather name={uploadingFor === ex.name ? "loader" : "upload"} size={14} color="#fff" />
-                <Text style={styles.uploadVideoBtnText}>
-                  {uploadingFor === ex.name ? "Uploading…" : "Upload Demo Video"}
-                </Text>
               </TouchableOpacity>
             )}
           </View>
@@ -540,12 +592,74 @@ export default function WorkoutDetailScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  heroControls: {
+  heroBanner: {
+    height: 280,
+    position: "relative" as const,
+    overflow: "hidden" as const,
+    justifyContent: "space-between",
+  },
+  heroBg: {
+    ...StyleSheet.absoluteFillObject,
+    width: "100%",
+    height: "100%",
+  },
+  heroTopRow: {
+    flexDirection: "row" as const,
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 8,
+  },
+  heroIconBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: "rgba(0,0,0,0.35)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  heroBottom: {
+    paddingHorizontal: 18,
+    paddingBottom: 20,
+    gap: 8,
+  },
+  heroTags: {
+    flexDirection: "row" as const,
+    gap: 8,
+  },
+  heroTag: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 20,
+  },
+  heroTagText: {
+    fontSize: 11,
+    fontWeight: "700" as const,
+    color: "#fff",
+    letterSpacing: 0.5,
+    textTransform: "uppercase" as const,
+  },
+  heroTitle: {
+    fontSize: 26,
+    fontWeight: "800" as const,
+    color: "#fff",
+    letterSpacing: -0.5,
+    lineHeight: 30,
+  },
+  heroMeta: {
+    flexDirection: "row" as const,
+    gap: 16,
+  },
+  heroMetaItem: {
     flexDirection: "row" as const,
     alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingBottom: 12,
+    gap: 5,
+  },
+  heroMetaText: {
+    fontSize: 13,
+    color: "rgba(255,255,255,0.85)",
+    fontWeight: "500" as const,
   },
   progressBarOuter: { flex: 1, height: 4, backgroundColor: "#eee", borderRadius: 2, overflow: "hidden" },
   progressBarInner: { height: 4, borderRadius: 2 },
