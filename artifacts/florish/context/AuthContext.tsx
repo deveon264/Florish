@@ -11,6 +11,8 @@ import {
   isSessionActive,
   setSessionActive,
   clearSession,
+  getRememberMe,
+  setRememberMe,
 } from "@/lib/storage";
 
 const ADMIN_EMAIL = "6ixbelowna@gmail.com";
@@ -38,7 +40,7 @@ type AuthState = {
   updateUser: (profile: UserProfile) => Promise<void>;
   completeOnboarding: () => Promise<void>;
   completePaywall: () => Promise<void>;
-  signIn: (email: string) => Promise<{ success: boolean; error?: string }>;
+  signIn: (email: string, rememberMe?: boolean) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   reload: () => Promise<void>;
 };
@@ -78,15 +80,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      // Production: require active session
-      const [profile, onb, paywall, session] = await Promise.all([
+      // Production: require active session + remember me
+      const [profile, onb, paywall, session, remember] = await Promise.all([
         getUserProfile(),
         isOnboardingComplete(),
         isPaywallPassed(),
         isSessionActive(),
+        getRememberMe(),
       ]);
       setHasProfile(!!profile);
-      if (!session) {
+      if (!session || !remember) {
+        // Clear the session so next load is clean
+        if (session && !remember) await clearSession();
         setUser(null);
         setOnboardingState(false);
         setPaywallState(false);
@@ -120,7 +125,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setPaywallState(true);
   };
 
-  const signIn = async (email: string): Promise<{ success: boolean; error?: string }> => {
+  const signIn = async (email: string, rememberMe = false): Promise<{ success: boolean; error?: string }> => {
     const normalised = email.trim().toLowerCase();
 
     // Admin account — always restore the dev profile regardless of what's in storage
@@ -129,6 +134,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await setOnboardingComplete();
       await setPaywallPassed();
       await setSessionActive(true);
+      await setRememberMe(rememberMe);
       setUser(DEV_ADMIN_PROFILE);
       setOnboardingState(true);
       setPaywallState(true);
@@ -146,6 +152,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     const [onb, paywall] = await Promise.all([isOnboardingComplete(), isPaywallPassed()]);
     await setSessionActive(true);
+    await setRememberMe(rememberMe);
     setUser(profile);
     setOnboardingState(onb);
     setPaywallState(paywall);

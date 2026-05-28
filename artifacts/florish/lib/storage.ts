@@ -5,6 +5,7 @@ const KEYS = {
   ONBOARDING_COMPLETE: "florish_onboarding_complete",
   PAYWALL_PASSED: "florish_paywall_passed",
   SESSION_ACTIVE: "florish_session_active",
+  REMEMBER_ME: "florish_remember_me",
   WATER_LOG: "florish_water_log",
   MEAL_LOG: "florish_meal_log",
   WORKOUT_HISTORY: "florish_workout_history",
@@ -113,6 +114,15 @@ export async function setSessionActive(active: boolean): Promise<void> {
 
 export async function clearSession(): Promise<void> {
   await setSessionActive(false);
+}
+
+export async function getRememberMe(): Promise<boolean> {
+  const val = await AsyncStorage.getItem(KEYS.REMEMBER_ME);
+  return val === "true";
+}
+
+export async function setRememberMe(remember: boolean): Promise<void> {
+  await AsyncStorage.setItem(KEYS.REMEMBER_ME, remember ? "true" : "false");
 }
 
 // Water

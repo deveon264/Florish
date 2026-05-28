@@ -24,6 +24,7 @@ export default function SignInScreen() {
   const botPad = Platform.OS === "web" ? 34 : insets.bottom;
 
   const [email, setEmail] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -34,7 +35,7 @@ export default function SignInScreen() {
     setError("");
     setLoading(true);
     try {
-      const result = await signIn(email);
+      const result = await signIn(email, rememberMe);
       if (result.success) {
         router.replace("/");
       } else {
@@ -90,6 +91,25 @@ export default function SignInScreen() {
               <Text style={[styles.errorText, { color: colors.destructive }]}>{error}</Text>
             </View>
           ) : null}
+
+          <TouchableOpacity
+            style={styles.rememberRow}
+            onPress={() => setRememberMe((v) => !v)}
+            activeOpacity={0.7}
+          >
+            <View style={[
+              styles.checkbox,
+              {
+                borderColor: rememberMe ? colors.primary : colors.border,
+                backgroundColor: rememberMe ? colors.primary : "transparent",
+              },
+            ]}>
+              {rememberMe && <Feather name="check" size={11} color={colors.primaryForeground} />}
+            </View>
+            <Text style={[styles.rememberLabel, { color: colors.mutedForeground }]}>
+              Remember me
+            </Text>
+          </TouchableOpacity>
         </View>
 
         <TouchableOpacity
@@ -154,6 +174,20 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   errorText: { fontSize: 13, flex: 1, lineHeight: 18 },
+  rememberRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 6,
+    borderWidth: 1.5,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  rememberLabel: { fontSize: 14 },
   continueBtn: {
     flexDirection: "row",
     paddingVertical: 18,
