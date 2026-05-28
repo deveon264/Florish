@@ -1,37 +1,37 @@
 const colors = {
   light: {
-    text: "#1C3533",
+    text: "#2C1A15",
     tint: "#E8A0B4",
 
-    background: "#F7FFFE",
-    foreground: "#1C3533",
+    background: "#FFF9F7",
+    foreground: "#2C1A15",
 
     card: "#FFFFFF",
-    cardForeground: "#1C3533",
+    cardForeground: "#2C1A15",
 
     primary: "#E8A0B4",
-    primaryDark: "#D4758E",
+    primaryDark: "#C97B9A",
     primaryForeground: "#FFFFFF",
 
-    secondary: "#EEF9F8",
-    secondaryForeground: "#1C3533",
+    secondary: "#FAF0EC",
+    secondaryForeground: "#2C1A15",
 
-    muted: "#EEF9F8",
-    mutedForeground: "#6B9E99",
+    muted: "#F5EDE8",
+    mutedForeground: "#9B7B74",
 
-    accent: "#3BBDB5",
+    accent: "#D4A574",
     accentForeground: "#FFFFFF",
 
     destructive: "#E07070",
     destructiveForeground: "#FFFFFF",
 
-    border: "#D9F0EE",
-    input: "#D9F0EE",
+    border: "#F0E4DF",
+    input: "#F0E4DF",
 
-    success: "#3DAF8C",
+    success: "#7CB992",
     successForeground: "#FFFFFF",
 
-    overlay: "rgba(28, 53, 51, 0.35)",
+    overlay: "rgba(44, 26, 21, 0.35)",
   },
 
   radius: 16,

@@ -203,7 +203,7 @@ export default function CaloriesScreen() {
 
           <View style={styles.macros}>
             <MacroBar label="Protein" value={protein} max={150} color="#E8A0B4" colors={colors} />
-            <MacroBar label="Carbs" value={carbs} max={200} color="#3BBDB5" colors={colors} />
+            <MacroBar label="Carbs" value={carbs} max={200} color="#D4A574" colors={colors} />
             <MacroBar label="Fat" value={fat} max={65} color="#A8C4E0" colors={colors} />
           </View>
         </View>
