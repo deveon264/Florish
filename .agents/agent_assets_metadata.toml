@@ -114,3 +114,9 @@ id = "mWCsMbFXMlVjWRMedOkhP"
 uri = "file://artifacts/florish/assets/images/bg_advanced.png"
 type = "image"
 title = "generated_image"
+
+[[generated]]
+id = "2LHgUOf2HRfncBiXdVr1Y"
+uri = "file://attached_assets/generated_images/a_confident_black_woman_42fc.png"
+type = "image"
+title = "generated_image"
