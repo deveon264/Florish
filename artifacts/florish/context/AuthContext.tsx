@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import * as SecureStore from "expo-secure-store";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Platform } from "react-native";
 import {
   UserProfile,
   getUserProfile,
@@ -12,6 +14,31 @@ import {
 
 const ADMIN_EMAIL = "6ixbelowna@gmail.com";
 const AUTH_TOKEN_KEY = "auth_session_token";
+
+// SecureStore doesn't work in web iframes (localStorage is blocked).
+// Fall back to AsyncStorage on web.
+async function storeToken(token: string): Promise<void> {
+  if (Platform.OS !== "web") {
+    await SecureStore.setItemAsync(AUTH_TOKEN_KEY, token);
+  } else {
+    await AsyncStorage.setItem(AUTH_TOKEN_KEY, token);
+  }
+}
+
+async function loadToken(): Promise<string | null> {
+  if (Platform.OS !== "web") {
+    return await SecureStore.getItemAsync(AUTH_TOKEN_KEY);
+  }
+  return await AsyncStorage.getItem(AUTH_TOKEN_KEY);
+}
+
+async function clearToken(): Promise<void> {
+  if (Platform.OS !== "web") {
+    await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
+  } else {
+    await AsyncStorage.removeItem(AUTH_TOKEN_KEY);
+  }
+}
 
 const DEV_ADMIN_PROFILE: UserProfile = {
   name: "Ndili",
@@ -74,7 +101,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchAuthUser = useCallback(async () => {
     try {
-      const token = await SecureStore.getItemAsync(AUTH_TOKEN_KEY);
+      const token = await loadToken();
       if (!token) {
         setAuthUser(null);
         return;
@@ -87,7 +114,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (data.user) {
         setAuthUser(data.user);
       } else {
-        await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
+        await clearToken();
         setAuthUser(null);
       }
     } catch {
@@ -154,7 +181,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!res.ok) {
         return { error: data.error || "Login failed" };
       }
-      await SecureStore.setItemAsync(AUTH_TOKEN_KEY, data.token);
+      await storeToken(data.token);
       setAuthUser(data.user);
       return {};
     } catch {
@@ -174,7 +201,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!res.ok) {
         return { error: data.error || "Registration failed" };
       }
-      await SecureStore.setItemAsync(AUTH_TOKEN_KEY, data.token);
+      await storeToken(data.token);
       setAuthUser(data.user);
       return {};
     } catch {
@@ -184,7 +211,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = useCallback(async () => {
     try {
-      const token = await SecureStore.getItemAsync(AUTH_TOKEN_KEY);
+      const token = await loadToken();
       if (token) {
         const apiBase = getApiBaseUrl();
         await fetch(`${apiBase}/api/auth/logout`, {
@@ -193,7 +220,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
       }
     } catch {}
-    await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
+    await clearToken();
     setAuthUser(null);
     setUser(null);
     setOnboardingState(false);
