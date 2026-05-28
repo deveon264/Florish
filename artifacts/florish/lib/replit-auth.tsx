@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback, type ReactNode } from "react";
 import * as AuthSession from "expo-auth-session";
 import * as WebBrowser from "expo-web-browser";
 import * as SecureStore from "expo-secure-store";
@@ -47,8 +47,12 @@ export function ReplitAuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const discovery = AuthSession.useAutoDiscovery(ISSUER_URL);
+  // Tracks whether the OIDC response handler is actively exchanging a code.
+  // Prevents the initial fetchUser (which has no token yet) from setting
+  // isLoading=false and triggering a premature "not authenticated" redirect.
+  const handlingResponseRef = useRef(false);
 
+  const discovery = AuthSession.useAutoDiscovery(ISSUER_URL);
   const redirectUri = AuthSession.makeRedirectUri();
 
   const [request, response, promptAsync] = AuthSession.useAuthRequest(
@@ -66,7 +70,10 @@ export function ReplitAuthProvider({ children }: { children: ReactNode }) {
       const token = await SecureStore.getItemAsync(AUTH_TOKEN_KEY);
       if (!token) {
         setUser(null);
-        setIsLoading(false);
+        // Only mark loading done if the response handler isn't mid-exchange.
+        if (!handlingResponseRef.current) {
+          setIsLoading(false);
+        }
         return;
       }
 
@@ -85,16 +92,25 @@ export function ReplitAuthProvider({ children }: { children: ReactNode }) {
     } catch {
       setUser(null);
     } finally {
-      setIsLoading(false);
+      if (!handlingResponseRef.current) {
+        setIsLoading(false);
+      }
     }
   }, []);
 
+  // Initial user fetch on mount (reads stored token if present).
   useEffect(() => {
     fetchUser();
   }, [fetchUser]);
 
+  // Handle the OIDC response after the user completes login in the browser.
   useEffect(() => {
     if (response?.type !== "success" || !request?.codeVerifier) return;
+
+    // Mark that we're actively handling a response so fetchUser doesn't
+    // prematurely clear the loading state.
+    handlingResponseRef.current = true;
+    setIsLoading(true);
 
     const { code, state } = response.params;
 
@@ -120,18 +136,18 @@ export function ReplitAuthProvider({ children }: { children: ReactNode }) {
 
         if (!exchangeRes.ok) {
           console.error("Token exchange failed:", exchangeRes.status);
-          setIsLoading(false);
           return;
         }
 
         const data = await exchangeRes.json();
         if (data.token) {
           await SecureStore.setItemAsync(AUTH_TOKEN_KEY, data.token);
-          setIsLoading(true);
           await fetchUser();
         }
       } catch (err) {
         console.error("Token exchange error:", err);
+      } finally {
+        handlingResponseRef.current = false;
         setIsLoading(false);
       }
     })();

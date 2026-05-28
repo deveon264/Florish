@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import { router } from "expo-router";
+import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Platform,
@@ -15,11 +16,19 @@ import { useAuth } from "@/context/AuthContext";
 export default function SignInScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { login } = useAuth();
+  const { login, isAuthenticated, isLoading } = useAuth();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const botPad = Platform.OS === "web" ? 34 : insets.bottom;
 
   const [loading, setLoading] = useState(false);
+
+  // If auth state resolves to authenticated (e.g. after OIDC callback),
+  // navigate back to root so index.tsx can route to the correct screen.
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      router.replace("/");
+    }
+  }, [isAuthenticated, isLoading]);
 
   const handleLogin = async () => {
     setLoading(true);
