@@ -239,7 +239,6 @@ export default function ProfileScreen() {
               {[
                 { q: "How do I track my calories?", a: "Tap the Calories tab at the bottom. You can log meals manually, search our food database, or use the camera to scan your food." },
                 { q: "How do workouts work?", a: "Go to the Workouts tab, tap any workout, and press Start Workout. Follow along with the on-screen timer and exercise instructions. Your session is saved automatically when you finish." },
-                { q: "Can I add my own workout videos?", a: "Workout demo videos are managed by the app admin. Regular users can watch the videos — only the admin account can upload or change them." },
                 { q: "How do I track my water intake?", a: "Use the Water tab to log your daily intake. Tap the + buttons to add preset amounts, or enter a custom amount." },
                 { q: "How do I cancel my subscription?", a: "Subscriptions are managed through the App Store (iOS) or Google Play (Android). Go to your device's subscription settings to cancel." },
                 { q: "My question isn't listed here", a: "Email us at support@florish.app and we'll get back to you within 24 hours." },
