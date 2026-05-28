@@ -4,5 +4,7 @@ export const modules: ModuleMap = {
   "./components/mockups/home-variants/ActivityRings.tsx": () => import("../components/mockups/home-variants/ActivityRings.tsx"),
   "./components/mockups/home-variants/CoachMessage.tsx": () => import("../components/mockups/home-variants/CoachMessage.tsx"),
   "./components/mockups/home-variants/DashboardGrid.tsx": () => import("../components/mockups/home-variants/DashboardGrid.tsx"),
+  "./components/mockups/home-variants/RingsPremium.tsx": () => import("../components/mockups/home-variants/RingsPremium.tsx"),
+  "./components/mockups/home-variants/RingsRefined.tsx": () => import("../components/mockups/home-variants/RingsRefined.tsx"),
   "./components/mockups/home-variants/WorkoutHero.tsx": () => import("../components/mockups/home-variants/WorkoutHero.tsx")
 };
