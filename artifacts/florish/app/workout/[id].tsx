@@ -285,9 +285,6 @@ export default function WorkoutDetailScreen() {
               <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
                 <Feather name="x" size={24} color="#fff" />
               </TouchableOpacity>
-              <View style={[styles.progressBarOuter, { backgroundColor: "rgba(255,255,255,0.3)" }]}>
-                <View style={[styles.progressBarInner, { backgroundColor: "#fff", width: `${progress * 100}%` as any }]} />
-              </View>
               <TouchableOpacity onPress={handleToggleFav} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
                 <Feather name="heart" size={22} color={isFav ? colors.primary : "rgba(255,255,255,0.85)"} />
               </TouchableOpacity>
@@ -308,9 +305,6 @@ export default function WorkoutDetailScreen() {
               <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
                 <Feather name="x" size={24} color={colors.foreground} />
               </TouchableOpacity>
-              <View style={styles.progressBarOuter}>
-                <View style={[styles.progressBarInner, { backgroundColor: colors.primary, width: `${progress * 100}%` as any }]} />
-              </View>
               <TouchableOpacity onPress={handleToggleFav} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
                 <Feather name="heart" size={22} color={isFav ? colors.primary : colors.mutedForeground} />
               </TouchableOpacity>
@@ -547,9 +541,9 @@ const styles = StyleSheet.create({
     top: 0, left: 0, right: 0,
     flexDirection: "row" as const,
     alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingBottom: 12,
-    gap: 12,
     backgroundColor: "transparent",
     zIndex: 10,
   },
