@@ -125,8 +125,8 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
   },
   thumbnail: {
-    width: 52,
-    height: 52,
+    width: 110,
+    height: 64,
     borderRadius: 10,
     borderWidth: 2,
   },
