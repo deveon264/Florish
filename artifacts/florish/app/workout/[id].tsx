@@ -24,14 +24,24 @@ import {
 } from "@/lib/storage";
 import * as Haptics from "expo-haptics";
 
-function ExerciseVideoPlayer({ uri }: { uri: string }) {
+function ExerciseVideoPlayer({ uri, shouldPlay }: { uri: string; shouldPlay: boolean }) {
   const [VideoComp, setVideoComp] = useState<any>(null);
+  const videoRef = useRef<any>(null);
 
   useEffect(() => {
     import("expo-av").then(({ Video, ResizeMode }) => {
       setVideoComp({ Video, ResizeMode });
     });
   }, []);
+
+  useEffect(() => {
+    if (!videoRef.current) return;
+    if (shouldPlay) {
+      videoRef.current.playAsync?.();
+    } else {
+      videoRef.current.pauseAsync?.();
+    }
+  }, [shouldPlay]);
 
   if (!VideoComp) {
     return (
@@ -44,11 +54,13 @@ function ExerciseVideoPlayer({ uri }: { uri: string }) {
   const { Video, ResizeMode } = VideoComp;
   return (
     <Video
+      ref={videoRef}
       source={{ uri }}
       style={styles.videoPlayer}
       useNativeControls
       resizeMode={ResizeMode.CONTAIN}
-      shouldPlay={false}
+      shouldPlay={shouldPlay}
+      isLooping
     />
   );
 }
@@ -235,7 +247,7 @@ export default function WorkoutDetailScreen() {
         {/* Hero: video player if available, else coloured banner */}
         {currentVideo ? (
           <View style={styles.videoHero}>
-            <ExerciseVideoPlayer uri={currentVideo.uri} />
+            <ExerciseVideoPlayer uri={currentVideo.uri} shouldPlay={isActive} />
             <View style={styles.videoHeroOverlay}>
               <View style={styles.videoOverlayRow}>
                 <View>
