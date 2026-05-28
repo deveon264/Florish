@@ -1,5 +1,6 @@
 import { router, useLocalSearchParams } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-file-system";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Alert,
@@ -185,6 +186,16 @@ export default function WorkoutDetailScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
 
+  const copyToPermanent = async (uri: string): Promise<string> => {
+    if (!FileSystem.documentDirectory) return uri;
+    const dir = `${FileSystem.documentDirectory}florish_videos/`;
+    await FileSystem.makeDirectoryAsync(dir, { intermediates: true });
+    const ext = uri.split("?")[0]?.split(".").pop() ?? "mp4";
+    const dest = `${dir}${Date.now()}.${ext}`;
+    await FileSystem.copyAsync({ from: uri, to: dest });
+    return dest;
+  };
+
   const handleUploadVideo = async (exerciseName: string) => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
@@ -199,7 +210,8 @@ export default function WorkoutDetailScreen() {
     if (result.canceled || !result.assets[0]) return;
     setUploadingFor(exerciseName);
     try {
-      const saved = await setExerciseVideo(exerciseName, result.assets[0].uri);
+      const permanentUri = await copyToPermanent(result.assets[0].uri);
+      const saved = await setExerciseVideo(exerciseName, permanentUri);
       setExerciseVideos((prev) => ({ ...prev, [exerciseName.toLowerCase()]: saved }));
     } finally {
       setUploadingFor(null);

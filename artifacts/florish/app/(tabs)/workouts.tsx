@@ -1,5 +1,6 @@
 import { router } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-file-system";
 import React, { useState, useEffect } from "react";
 import {
   Alert,
@@ -43,6 +44,16 @@ export default function WorkoutsScreen() {
     setCustomVideos(videos);
   };
 
+  const copyToPermanent = async (uri: string): Promise<string> => {
+    if (!FileSystem.documentDirectory) return uri;
+    const dir = `${FileSystem.documentDirectory}florish_videos/`;
+    await FileSystem.makeDirectoryAsync(dir, { intermediates: true });
+    const ext = uri.split("?")[0]?.split(".").pop() ?? "mp4";
+    const dest = `${dir}${Date.now()}.${ext}`;
+    await FileSystem.copyAsync({ from: uri, to: dest });
+    return dest;
+  };
+
   const handleUploadVideo = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
@@ -58,12 +69,13 @@ export default function WorkoutsScreen() {
     setUploading(true);
     try {
       const asset = result.assets[0];
+      const permanentUri = await copyToPermanent(asset.uri);
       const title = await promptTitle();
       const video = await addCustomWorkoutVideo({
-        uri: asset.uri,
+        uri: permanentUri,
         title: title || "My Workout",
         duration: asset.duration ? Math.round(asset.duration / 60) : undefined,
-        thumbnail: asset.uri,
+        thumbnail: permanentUri,
       });
       setCustomVideos((prev) => [...prev, video]);
       setActiveCategory("My Videos");
