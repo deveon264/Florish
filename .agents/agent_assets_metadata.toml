@@ -18,3 +18,51 @@ id = "EzAHSGyYi1ez8I1B47aGS"
 uri = "file://artifacts/florish/assets/images/workout_banner.png"
 type = "image"
 title = "generated_image"
+
+[[generated]]
+id = "GXSsOj85PMF2wm__tmkKN"
+uri = "file://artifacts/florish/assets/images/workout_full_body.png"
+type = "image"
+title = "black woman full body workout"
+
+[[generated]]
+id = "GsRVOirObUI2Mf2cD-KZA"
+uri = "file://artifacts/florish/assets/images/workout_hiit.png"
+type = "image"
+title = "black woman HIIT workout"
+
+[[generated]]
+id = "lXwPDjdXEZx7QNkjKykNi"
+uri = "file://artifacts/florish/assets/images/workout_toning.png"
+type = "image"
+title = "black woman toning workout"
+
+[[generated]]
+id = "IA4TfozxkJ-VlmLwbwfs2"
+uri = "file://artifacts/florish/assets/images/workout_abs.png"
+type = "image"
+title = "black woman abs workout"
+
+[[generated]]
+id = "oqZFfUgN3aFc8ufcrd65p"
+uri = "file://artifacts/florish/assets/images/workout_upper_body.png"
+type = "image"
+title = "black woman upper body workout"
+
+[[generated]]
+id = "M3QCqvYtyiQsILt7s3plm"
+uri = "file://artifacts/florish/assets/images/workout_lower_body.png"
+type = "image"
+title = "black woman lower body workout"
+
+[[generated]]
+id = "MqAuOBg7nCy5Ic1e6TDaw"
+uri = "file://artifacts/florish/assets/images/workout_beginner.png"
+type = "image"
+title = "black woman beginner workout"
+
+[[generated]]
+id = "jGh55D9yoXL9NcGhRdgm3"
+uri = "file://artifacts/florish/assets/images/workout_advanced.png"
+type = "image"
+title = "black woman advanced workout"
