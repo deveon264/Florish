@@ -60,7 +60,7 @@ export function ReplitAuthProvider({ children }: { children: ReactNode }) {
       clientId: getClientId(),
       scopes: ["openid", "email", "profile", "offline_access"],
       redirectUri,
-      prompt: AuthSession.Prompt.Login,
+      prompt: AuthSession.Prompt.SelectAccount,
     },
     discovery,
   );
