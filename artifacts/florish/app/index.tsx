@@ -17,7 +17,7 @@ export default function EntryScreen() {
   }
 
   if (!isAuthenticated) {
-    return <Redirect href="/onboarding/signin" />;
+    return <Redirect href="/onboarding/welcome" />;
   }
 
   if (!onboardingComplete) {
